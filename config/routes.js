@@ -95,4 +95,14 @@ module.exports.routes = {
   'GET /staff/list':   'StaffController.list',
   'GET /staff/manage': 'StaffController.manage',
 
+  'GET /patient/history/:id' : 'PatientController.loadHistory',
+
+    'GET /cdc/travel/country/:country' : 'CdcController.travel',
+    'GET /cdc/travel/region/:region'   : 'CdcController.travel',
+    'GET /cdc/side_effects/:vaccine' : 'CdcController.side_effects',
+    'GET /cdc/contraindications/:vaccine' : 'CdcController.contraindications',
+    'GET /cdc/indications/:risk' : 'CdcController.indications',
+    'GET /cdc/regions'          : 'CdcController.regions',
+    'GET /cdc/risks' : 'CdcController.risks',
+
 };
