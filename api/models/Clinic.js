@@ -68,12 +68,12 @@ module.exports = {
   },
 
   load: function (input, cb) {
-          var fields = ['clinic.name as clinic', 'clinic_id', 'clinic.address', 'user.name as user', 'clinic_staff', 'staff.role', 'visit.id as visit_id'];
+          var fields = ['clinic.name as clinic', 'clinic.id as clinic_id', 'clinic.address', 'user.name as user', 'staff.id as staff_id', 'user.name as staff', 'staff.role', 'visit.id as visit_id', 'CS.dutyStatus'];
           var tables = "clinic";
           var left_joins = [
             "visit ON visit.clinic_id=clinic.id",
-            "clinic_staff__staff_clinics AS CS ON CS.staff_clinics=clinic.id",
-            "staff ON CS.clinic_staff=staff.id",
+            "clinic_staff AS CS ON CS.clinic_id=clinic.id",
+            "staff ON CS.staff_id=staff.id",
             "user on staff.user_id=user.id"
           ];
 
@@ -95,52 +95,58 @@ module.exports = {
       if (left_joins.length) { query += " LEFT JOIN " + left_joins.join(' LEFT JOIN ') }
       if (conditions.length) { query += " WHERE " + conditions.join(' AND ') }
       console.log("Q: " + query);
-
-
-    console.log("Clinic Query: " + query);
     
-    Visit.query(query, function (err, result) {
-        if (err) { cb(err) }
+      Visit.query(query, function (err, result) {
+        if (err || (result == undefined) ) { 
+          console.log("No result...");
+          return cb(err)
+        }
 
         console.log("CLINIC INFO: " + JSON.stringify(result));
 
         var clinicStaff = [];
-        for (var i=0; i<result.length; i++) {
-          var staffInfo = {
-            'id' : result[i]['clinic_staff'],
-            'name' : result[i]['user'],
-            'role' : result[i]['role'],
-            'status' : result[i]['dutyStatus'],
+        if (result) {
+          for (var i=0; i<result.length; i++) {
+            var staffInfo = {
+              'id' : result[i]['staff_id'],
+              'name' : result[i]['staff'],
+              'role' : result[i]['role'],
+              'status' : result[i]['dutyStatus'],
+            }
+            clinicStaff.push(staffInfo);
           }
-          clinicStaff.push(staffInfo);
+
+          var info = {};
+          /** load clinic info **/
+
+          /** load clinic info **/ 
+          info['clinic'] = {
+            id: result[0]['clinic_id'],
+            name: result[0]['clinic'],
+            address: result[0]['address'],
+            staff: clinicStaff, 
+          };
+
+          if (result[0]['patient_id']) {
+            info['patient'] = {
+              id: result[0]['patient_id'],
+              firstName: result[0]['firstName'],
+              lastName: result[0]['lastName'],
+              name: result[0]['firstName'] + ' ' + result[0]['lastName'],
+              gender: result[0]['gender'],
+              birthdate: result[0]['birthdate'],
+              age: result[0]['age'],
+              location: result[0]['location'],
+              visit_id: result[0]['visit_id'],
+            }
+          }
         }
-
-        var info = {};
-        /** load clinic info **/
-
-        /** load clinic info **/ 
-        info['clinic'] = {
-          id: result[0]['clinic_id'],
-          name: result[0]['clinic'],
-          address: result[0]['address'],
-          staff: clinicStaff, 
-        };
-
-        if (result[0]['patient_id']) {
-          info['patient'] = {
-            id: result[0]['patient_id'],
-            firstName: result[0]['firstName'],
-            lastName: result[0]['lastName'],
-            name: result[0]['firstName'] + ' ' + result[0]['lastName'],
-            gender: result[0]['gender'],
-            birthdate: result[0]['birthdate'],
-            age: result[0]['age'],
-            location: result[0]['location'],
-            visit_id: result[0]['visit_id'],
-          }
+        else { 
+          console.log("nothing returned");
+          return cb("NO RESULT");
         }
         
-        cb(null, info);
+        return cb(null, info);
     });     
 
   }

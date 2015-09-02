@@ -8,23 +8,13 @@
 module.exports = {
 
   attributes: {
-  	known_side_effect: {
-  		type: 'string'
+  	name : {
+  	    type: 'string'
   	},
+        description : {
+            type: 'string'
+        }
 
-  	probability: {
-  		type: 'decimal'
-  	},
-
-  	degree: {
-  		type: 'string',
-  		enum: ['Strong', 'Normal','Mild'],
-  		defaultsTo: 'Normal'
-  	},
-  	
-    vaccine_id: {
-      model: 'vaccine',
-    }
   }
 };
 

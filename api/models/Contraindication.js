@@ -19,10 +19,9 @@ module.exports = {
   		defaultsTo: 'Normal'
   	},
   	
-    vaccine_id: {
-      model: 'vaccine',
-      columnName: 'vaccine_id'
-    }
+        vaccine_id: {
+            model: 'vaccine',
+        }
   }
 };
 
