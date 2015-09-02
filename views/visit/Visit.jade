@@ -54,14 +54,9 @@ block content
                     tr
                       td
                         a.btn.btn-warning.btn-xs(
-                          tabindex="0"
-                          data-trigger='focus' 
-                          data-toggle="popover"
-                          data-html="true"
-                          data-placement="left"
-                          ng-click="loadPatientHistory()"
-                          data-title="Patient History" 
-                          data-content="Dynamically load detailed Patient Vaccination History 1...."
+                          ng-click="loadPatientHistory(patient.id, 'recordData')" 
+                          data-toggle="modal" 
+                          data-target="#viewHistoryModal"
                           ) View Patient History
               td.col-md-4(align='right')
                 div(ng-if="patient.id")
@@ -146,12 +141,7 @@ block content
                 td {{ q.recommendation }}
                 td 
                   a.btn.btn-warning.btn-xs(
-                    ng-click="loadPatientHistory(vaccine.id)"
-                    tabindex="{{$index}}"
-                    data-trigger='focus' 
-                    data-toggle="popover" 
-                    data-title="Patient History" 
-                    data-content="Dynamically load detailed Patient Vaccination History for this vaccine...."
+    
                     )  
                     i.fa.fa-info-circle &nbsp; 
                   
@@ -181,6 +171,21 @@ block content
                   h4.modal-title Apply Immunization
                 div.modal-body
                   include editImmunization.jade
+                  hr
+                  div#insideModal
+                div.modal-footer
+                  button.btn.btn-default(type="button button-danger" data-dismiss="modal") Close
+                  div.modal.fade#editImmunizationModal
+
+          div.modal.fade#viewHistoryModal  
+            div.modal-dialog
+              div.modal-content
+                div.modal-header
+                  button.close(type="button" class="close" data-dismiss="modal" aria-label="Close")
+                    span(aria-hidden="true") &times;
+                  h4.modal-title Patient History
+                div.modal-body
+                  include history.jade
                   hr
                   div#insideModal
                 div.modal-footer
