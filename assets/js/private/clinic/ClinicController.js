@@ -91,8 +91,8 @@ app.controller('ClinicController',
         var leftJoins = [
             'queued_patient ON queued_patient.queue_id=queue.id',
             'patient ON queued_patient.patient_id=patient.id',
-            'clinic_staff__staff_clinics ON clinic_id=clinic.id',
-            'staff ON clinic_staff__staff_clinics.staff_id',
+            'clinic_staff ON clinic_id=clinic.id',
+            'staff ON clinic_staff.staff_id=staff.id',
             'user as Vaccinator ON Vaccinator.id=staff.user_id',
             'treatment ON treatment.visit_id=visit.id',
         ];
@@ -194,10 +194,36 @@ $scope.$parent.MenuSettings = {
     $scope.addItem = function( ) {
         Nto1Factory.addItem( $scope.itemColumns, $scope.items );
         var index = $scope.items.length - 1;
-        console.log('added item');
-        $scope.$parent.items[index].status = 'queued';
+        console.log('add patient to queue ');
+
+        $scope.$parent.items[index].status = 'Queued';
         $scope.$parent.items[index].Arrival_Time = $scope.now;
         $scope.$parent.items[index].position = $scope.items.length;
+        $scope.$parent.items[index].staff_id = $scope.user.id;
+        $scope.$parent.items[index].clinic_id = $scope.id;
+        $scope.$parent.items[index].queue_id = $scope.queue_id;
+
+        var data = JSON.stringify($scope.items[index]);
+
+        console.log("Data: " + data );
+
+        var visitData = { 
+            'patient_id' : $scope.items[index]['Patient'], 
+            'clinic_id' : $scope.clinic.id,
+            'staff_id' : $scope.user.id
+        }
+
+        $http.post("/queued_patient", data)
+        .then ( function (res) {
+            console.log("Added queued patient");
+            console.log(JSON.stringify(res));
+
+            $http.post("/visit", JSON.stringify(visitData))
+            .then ( function (res) {
+                console.log("added visit... ");
+                $scope.$parent.items[index]['visit_id'] = res['id'];
+            });
+        });
     }
 
     $scope.loadRecord = function (recordId) {
