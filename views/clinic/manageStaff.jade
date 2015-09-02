@@ -8,20 +8,20 @@ div
               th &nbsp;
               th Staff
               th Position
-            tr(ng-repeat='emp in Staff.options')
+            tr(ng-repeat='staff in clinic.staff')
               td
-                span(ng-if="emp.Duty_Status != 'on duty'")
-                  button.btn.btn-primary.btn-xs(type='button' ng-click="setDuty(emp.Clinic_Staff_ID,'on duty')") +
-                span(ng-if="emp.Duty_Status == 'on duty'")
-                  button.btn.btn-danger.btn-xs(type='button' ng-click="setDuty(emp.Clinic_Staff_ID, 'off duty')") -           
+                span(ng-if="staff.status != 'on duty'")
+                  button.btn.btn-primary.btn-xs(type='button' ng-click="setDuty(staff.id,'on duty')") +
+                span(ng-if="staff.status == 'on duty'")
+                  button.btn.btn-danger.btn-xs(type='button' ng-click="setDuty(staff.id, 'off duty')") -           
               td 
-                span(ng-if="emp.Duty_Status != 'on duty'")
-                  span {{emp.Staff_Name}} [ {{emp.Staff_ID}}] &nbsp;
-                span(ng-if="emp.Duty_Status == 'on duty'")
-                  b  {{emp.Staff_Name}} [ {{emp.Staff_ID}}]
+                span(ng-if="staff.status != 'on duty'")
+                  span {{staff.name}} [ {{staff.id}}] &nbsp;
+                span(ng-if="staff.status == 'on duty'")
+                  b  {{staff.name}} [ {{staff.id}}]
                   i.glyphicon.glyphicon-ok.navbar-right
 
-              td {{emp.Staff_Role}} {{ emp.Duty_Status }}
+              td {{staff.role}} {{ staff.status }}
         hr
 
         button.btn.btn-success(type='button' ng-click="newStaff()" ng-disabled="newItemForm.$invalid") Add Outside Staff

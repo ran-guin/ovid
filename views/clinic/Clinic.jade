@@ -97,7 +97,7 @@ block content
                   span &nbsp;
                   button.btn.btn-warning.btn-xs(type='button' data-toggle='modal' data-target='#editItemModal') Edit            
                 td {{ q.position }}
-                td {{ q.lastName }} : {{ q.id }} 
+                td {{ q.lastName }} : {{ q.patient_id }} 
                 td {{ q.firstName }}
                 td {{ q.birthdate }} {{ q.identifier }}
                 td {{ q.notes }}             
@@ -105,11 +105,15 @@ block content
                   span(ng-if="q.Vaccinator")
                     b {{ q.Vaccinator }}
                   span(ng-if="!q.Vaccinator")
-                    button.btn.btn-warning.btn-xs(type='button' data-toggle='modal' ng-click="focusPatient(q.id)" data-target='#assignStaffModal') Assign 
+                    button.btn.btn-success.btn-xs(type='button' data-toggle='modal' ng-click="focusPatient(q.id)" data-target='#assignStaffModal') Assign
+                  span(ng-if="2") 
+                    // if user has access to treatment 
+                    a.btn.btn-success.btn-xs(href="/visit/home/{{q.visit}}") Treat
+
                 td {{ q.Wait_Time }}
                 td {{ q.Site_Name }}
                 td {{ q.treatment_id }}
-                td {{ q.Queued_Status }}
+                td {{ q.status }}
           div(ng-if="! items.length")
             b (Nothing currently in the queue)
         
