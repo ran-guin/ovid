@@ -11,14 +11,12 @@ module.exports = {
 
   attributes: {
 
-  	visitId: {
-  		model: 'visit',
-  		columnName: 'visit_id'
+  	appointment_id : {
+  		model: 'appointment',
   	},
 
-  	vaccineId: {
+  	vaccine_id: {
   		model: 'vaccine',
-  		columnName: 'vaccine_id'
   	},
  
  	route: {
@@ -46,13 +44,16 @@ module.exports = {
   	reactionLevel: {
   		type: 'string',
   		enum: ['None','Mild','Strong'],
-  		required: true
   	},
 
   	reactionNotes: {
   		type: 'string'
   	},
-
+        
+        status : {
+            type: 'string',
+            enum: ['Scheduled', 'Scanned', 'Declined', 'Applied']
+        }
   }
 };
 
