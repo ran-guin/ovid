@@ -36,7 +36,7 @@ block content
                     td #{attr}
                     td #{val}
 
-            h3 Lookup:
+            h3 Member Clinics:
             - var preload = "loadLookup('" + url + "/lookup/clinic', 'clinic', 'Clinics')"; 
             div(ng-dropdown-multiselect="" options="Lookup.Clinics.options" selected-model="Clinics", extra-settings="MenuSettings" ng-init="#{preload}")
             b options = {{ Lookup.Clinics.options }}
@@ -52,10 +52,7 @@ block content
                     b {{ clinic.name }}
                   td 
                     a(href="/clinic/home/{{clinic.id}}")
-                      b Queue
-                  td 
-                    a(href="/visit/home")
-                      b Treatment Page
+                      b Appointments 
    
             div.tab-pane#work(role="tabpanel")
               p &nbsp;
