@@ -27,7 +27,7 @@ module.exports = {
     },
     status : {
         type: 'string',
-        enum: ['Agree','Decline','Taken']
+        enum: ['Scheduled','Scanned', 'Declined','Taken']
     },
     notification_status : {
         type: 'string',
