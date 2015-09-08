@@ -38,10 +38,10 @@ app.controller('ClinicController',
 
     /** run PRIOR to standard initialization  */
     $scope.setup = function (config) {
-        $scope.$parent.itemClass = 'patient';
-        $scope.$parent.mainClass = 'queue';
+        $scope.$parent.itemClass = 'appointment';
+        $scope.$parent.mainClass = 'clinic';
         
-        $scope.$parent.statusField = 'queueStatus';
+        $scope.$parent.statusField = 'status';
         $scope.$parent.statusDefault = 'Active';
 
         /* Customize as Required */
@@ -54,66 +54,67 @@ app.controller('ClinicController',
         $scope.$parent.statusOptions = ['Active', 'Closed', 'Terminated'];
  
         $scope.Columns = [
-            { field : 'clinic.id', set: 1},
+            { field : 'clinic.id', label: 'clinic_id', set: 1},
             { field : 'clinic.name', label: 'Clinic'},
             { field : 'clinic.address' },
             { field : 'region_id'},
-            { field : 'queue.id'},
+            { field : 'appointment.id' },
             { field : 'user.name', label : 'deskStaff'},
             { field : 'user.id', label : 'deskStaffId', set: 1},
         ];
 
         $scope.itemColumns = [
-            { field : 'patient.id', label: 'Patient', set: 1, mandatory : 1, hidden:1},
+            { field : 'patient.id', label: 'patient_id', set: 1, mandatory : 1, hidden:1},
             { field : 'lastName'},
             { field : 'firstName'},
             { field : 'identifier'},
             { field : 'identifierType'},
             { field : 'gender'},
-            { field : 'birthdate'},
-            { field : 'queue.status', hidden: 1},
+            { field : "DATE_FORMAT(patient.birthdate,'%b %d, %y')", label: 'birthdate', type: 'date'},
+            { field : 'appointment.status', hidden: 1},
   //          { field : 'queue.position', hidden: 1},
   //         { field : 'Wait_Time', hidden: 1},
             { field : 'Vaccinator.id', label : 'VaccinatorId', hidden: 1},
             { field : 'Vaccinator.name', label : 'Vaccinator', hidden: 1},
             // { field : 'Age'},
             { field : 'notes'},
-            // { field : 'Visit_Reason'},
+            // { field : 'appointment_Reason'},
             { field : 'treatment.id', hidden: 1},
             { field : 'site', hidden: 1},
             { field : 'route', hidden: 1},
-      //      { field : 'Visit_Reason'},
-      //      { field : 'Visit_Reason_ID', hidden: 1},
+            { field : 'position'}
+
+      //      { field : 'appointment_Reason'},
+      //      { field : 'appointment_Reason_ID', hidden: 1},
        ];
     
         /* Load Fields based on fields above using tables / condition below */
-        $scope.queryTables = "(queue, clinic, visit)";
+        $scope.queryTables = "(clinic, appointment)";
         var leftJoins = [
-            'queued_patient ON queued_patient.queue_id=queue.id',
-            'patient ON queued_patient.patient_id=patient.id',
+            'patient ON appointment.patient_id=patient.id',
             'clinic_staff ON clinic_id=clinic.id',
             'staff ON clinic_staff.staff_id=staff.id',
             'user as Vaccinator ON Vaccinator.id=staff.user_id',
-            'treatment ON treatment.visit_id=visit.id',
+            'treatment ON treatment.appointment_id=appointment.id',
         ];
         if (leftJoins.length) {
             $scope.queryTables += ' LEFT JOIN ' + leftJoins.join(' LEFT JOIN ');
         }
         
-        $scope.queryCondition = "queue.visit_id=visit.id and visit.clinic_id=clinic.id";
+        $scope.queryCondition = "appointment.clinic_id=clinic.id";
    
         $scope.Autocomplete = {
             url : '/api/search',
             view: 'clinic/Clinic',
             target : 'lastName',
-            show : "Patient,lastName,firstName,gender,birthdate, identifier, identifierType, notes",
-            search : 'Patient,lastName,firstName,identifier, gender, birthdate, notes',
-            hide: 'Patient',
+            show : "patient_id,lastName,firstName,gender,birthdate, identifier, identifierType",
+            search : "patient_id,lastName,firstName,identifier, gender,birthdate",
+            hide: 'patient_id',
             query_table : "patient",
-            query_field : "patient.id as Patient,lastName,firstName,gender,birthdate,identifier, notes",
+            query_field : "patient.id as patient_id,lastName,firstName,gender,identifier, DATE_FORMAT(patient.birthdate,'%b %d, %y') as birthdate, position",
             query_condition : "1",
             // query : "SELECT DISTINCT User_Name,Request_Date,Item_Request_ID,Item_Category_Description,Unit_Qty,Item_Name,Item_Catalog,Vendor_ID,Vendor_Name, CASE WHEN Unit_Cost IS NULL THEN Item_Cost ELSE Unit_Cost END as Unit_Cost,Item_Request_Notes,Deliver_To, Item_Request_Notes FROM (Item, Item_Request, Request, User) JOIN Item_Category ON FK_Item_Category__ID=Item_Category_ID LEFT JOIN Vendor ON Vendor_ID=FK_Vendor__ID WHERE FK_Request__ID=Request_ID AND FKRequester_User__ID=User_ID AND FK_Item__ID=Item_ID AND Request_ID=FK_Request__ID",
-            set : "Patient,lastName,firstName,identifier,gender,birthdate, notes",
+            set : "patient_id,lastName,firstName,identifier,gender,birthdate",
             // condition : "FK_Item_Category__ID IN (<Item_Category>)",
             onEmpty : "No Patients found.<P><div class='alert alert-warning'>Please try different spellings or different field to search.<P>Please only add a new item if this item has never been received before.  <button class='btn btn-primary' type='button' data-toggle='modal' data-target='#newPatientModal'> Add New Patient </button></div>\n"
         };
@@ -124,20 +125,6 @@ app.controller('ClinicController',
 
         $scope.$parent.setup(config);
     }
-
-/** redundant ? **/
-$scope.$parent.MenuSettings = {
-    closeOnSelect: true,
-    selectionLimit: 1,
-    enableSearch: true,
-    showCheckAll: false,
-    showUncheckAll: false,
-    externalIdProp: '',
-    smartButtonMaxItems: 3,
-    smartButtonTextConverter: function(itemText, originalItem) {
-        return itemText;
-    }
-};
 
       $scope.syncLookup = function (attribute, id, label) {
           console.log("sync " + attribute);
@@ -198,31 +185,20 @@ $scope.$parent.MenuSettings = {
 
         $scope.$parent.items[index].status = 'Queued';
         $scope.$parent.items[index].Arrival_Time = $scope.now;
-        $scope.$parent.items[index].position = $scope.items.length;
         $scope.$parent.items[index].staff_id = $scope.user.id;
-        $scope.$parent.items[index].clinic_id = $scope.id;
-        $scope.$parent.items[index].queue_id = $scope.queue_id;
+        $scope.$parent.items[index].clinic_id = $scope.clinic.id;
+
+       $scope.$parent.items[index].position = $scope.items.length;
 
         var data = JSON.stringify($scope.items[index]);
 
         console.log("Data: " + data );
 
-        var visitData = { 
-            'patient_id' : $scope.items[index]['Patient'], 
-            'clinic_id' : $scope.clinic.id,
-            'staff_id' : $scope.user.id
-        }
-
-        $http.post("/queued_patient", data)
+        $http.post("/appointment", data)
         .then ( function (res) {
             console.log("Added queued patient");
             console.log(JSON.stringify(res));
 
-            $http.post("/visit", JSON.stringify(visitData))
-            .then ( function (res) {
-                console.log("added visit... ");
-                $scope.$parent.items[index]['visit_id'] = res['id'];
-            });
         });
     }
 
@@ -281,43 +257,7 @@ $scope.$parent.MenuSettings = {
 
     $scope.loadStaff = function () {
         console.log('load Staff');
-        $scope.staff = [];
 
-/*
-        var url = '/api/q';
-//        var query = "SELECT Clinic_Staff_ID, User_Position as Staff_Role, User_Name as Staff_Name, User_ID as Staff_ID, Duty_Status FROM Clinic_Staff, User as Staff WHERE FK_User__ID=Staff.User_ID AND FK_Clinic__ID = '" + $scope.clinicId + "'";
-        var query = "SELECT staff.id, role, user.name, user_id from staff, user where user_id = user.id";
-
-//        Staff.query("Select * from staff", cb);
-
-        $scope.$parent.Staff = {};
-        console.log('q: ' + url + '?query=' + query);
-*/
-
-//        return $http.get(url + '?query=' + query)
-        return $http.get("/staff/load")
-            .success ( function (response) {
-                var options = response;
-                
-                console.log("Loaded Staff: ");
-                console.log(JSON.stringify(options));
-
-                $scope.$parent.Staff = {};
-                $scope.staff = [];
-                $scope.$parent.Staff.options = options;
-
-                for (var i=0; i<$scope.Staff.options.length; i++) {
-                    if ($scope.Staff.options[i].Duty_Status == 'on duty') {
-                        var name = $scope.Staff.options[i].Staff_Name;
-                        var role = $scope.Staff.options[i].Staff_Role;
-                        $scope.staff.push({ 'Name' : name, 'Role' : role} );
-                    }
-                }
-
-            })
-            .error ( function (response) {
-                console.log("Error loading Staff");
-            });
     }
 
     $scope.focusPatient = function (patient_id) {
@@ -325,11 +265,46 @@ $scope.$parent.MenuSettings = {
         $scope.activePatient = patient_id;
     }
 
-    $scope.assignStaff = function (index, staff_id) {
-        console.log(index + ": Assign staff " + staff_id + ' to ' + $scope.activePatient);
-        $scope.clinic.staff[index]['assigned'] = $scope.activePatient;
+    $scope.checkAssignments = function (appointment_id) {
+        console.log("update staff status... ");
+        
+        $scope.activeAppointment = appointment_id;
+
+        var startTime;
+        var endTime;
+
+        if ($scope.clinic && $scope.clinic.appointments) {
+            for (var i=0; i< $scope.clinic.appointments.length; i++) {
+                if ( $scope.clinic.appointments[i]['id'] == appointment_id ) {
+                    startTime = $scope.appointments[i]['startTime'];
+                    endTime = $scope.appointments[i]['endTime'];
+                }
+            }
+
+            $http.get("/staff/schedule/" + $scope.clinic.id + "?start=" + startTime + "&end=" + endTime)
+            .then ( function (response) {
+                for (var i=0; i<$scope.clinic.staff.length; i++) {
+                    var staff_id = $scope.clinic.staff[i]['id'];
+                    if (response[staff_id]) {
+                        $scope.clinic.staff[i].schedule = response[staff_id]['bookings'].join("<BR>");
+                        $scope.clinic.staff[i].assignedTo = response[staff_id]['between'];
+                    }
+                }
+            });
+        }
     }
 
+    $scope.assignStaff = function (index, staff_id) {
+        console.log("Assign staff " + staff_id + ' to ' + $scope.activeAppointment);
+        $scope.clinic.staff[index]['assigned'] = $scope.activeAppointment;
+        $scope.clinic.staff[index]['assignedTo'] = $scope.activeAppointment;
+   }
+    
+    $scope.deassignStaff = function (index, staff_id) {
+        console.log(" DeAssign staff " + staff_id + ' from ' + $scope.clinic.staff[index]['assignedTo'] );
+        $scope.clinic.staff[index]['assigned'] = null;
+        $scope.clinic.staff[index]['assignedTo'] = null;
+   }
     /********** Save Request and List of Items Requested **********/
     $scope.createRecord = function() {
             console.log("Post " + $scope.mainClass);
