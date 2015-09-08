@@ -151,7 +151,7 @@ module.exports = {
             // Load appointments  
             var tables = "patient, appointment";
             var fields = ['lastName', 'firstName','gender', "DATE_FORMAT(patient.birthdate,'%b %d, %y') as birthdate",'patient.id as patient_id'];
-            fields.push(['appointment.id as appointment_id', 'position', arrivalTime','startTime','vaccinator_id']);
+            fields.push(['appointment.id as appointment_id', 'position', 'arrivalTime', 'startTime', 'vaccinator_id']);
             fields.push(['Vuser.name as Vaccinator']);
 
             var left_joins = [
