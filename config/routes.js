@@ -87,6 +87,8 @@ module.exports.routes = {
   'GET /clinic/edit': 'ClinicController.edit',
   'GET /clinic/add' : 'ClinicController.new',
   'POST /clinic/add' : 'ClinicController.add',
+  
+  'GET /appointment/home/:id' : 'AppointmentController.home',
 
   'GET /visit/home' : 'VisitController.home',
   'GET /visit/home/:id' : 'VisitController.home',
