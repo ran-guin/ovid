@@ -22,7 +22,11 @@ module.exports = {
     	required: true,
     	unique: true,
     },
-
+    
+    defaultRoute: {
+                type: 'string',
+                enum: ['IM - Intramuscular', 'SC - Subcutaneous','ID - Intradermal', 'IN - Intranasal', 'PO - Oral']
+    },
  
 /*
     // alternative name (array ?)  ## eg "yellow jack"
