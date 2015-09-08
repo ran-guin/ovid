@@ -77,38 +77,50 @@ block content
 
           hr
           h3 Queue:
-          div(ng-if="items.length")
-            table.table
-              tr
+          div(ng-if="clinic.appointments.length")
+            table.table.table-bordered
+              tr.active
                 td &nbsp;
-                td Position
-                td Last Name
-                td First Name
-                td Birthdate
-                td Notes
-                td Vaccinator
-                td Wait Time
-                td Room          
-                td Session          
-                td Status
-              tr(ng-repeat="q in items")
+                td 
+                  b Position
+                td 
+                  b Last Name
+                td 
+                  b First Name
+                td 
+                  b Birthdate
+                td
+                  b ID #
+                td 
+                  b Vaccinator
+                td 
+                  b Wait Time
+                td 
+                  b Room          
+                td 
+                  b Session          
+                td 
+                  b Status
+              tr(ng-repeat="q in clinic.appointments")
                 td
                   button.btn.btn-danger.btn-xs(type='button' value="Delete" ng-click="deleteItem($index)") X
                   span &nbsp;
-                  button.btn.btn-warning.btn-xs(type='button' data-toggle='modal' data-target='#editItemModal') Edit            
-                td {{ q.position }}
-                td {{ q.lastName }} : {{ q.patient_id }} 
+                  button.btn.btn-warning.btn-xs(type='button' data-toggle='modal' data-target='#editItemModal') Edit
+                td         
+                  span {{ q.position }} 
+
+                td {{ q.lastName }} 
                 td {{ q.firstName }}
-                td {{ q.birthdate }} {{ q.identifier }}
-                td {{ q.notes }}             
+                td {{ q.birthdate }} 
+                td {{ q.identifier_type }} {{ q.identiferType }}
                 td 
                   span(ng-if="q.Vaccinator")
                     b {{ q.Vaccinator }}
                   span(ng-if="!q.Vaccinator")
-                    button.btn.btn-success.btn-xs(type='button' data-toggle='modal' ng-click="focusPatient(q.id)" data-target='#assignStaffModal') Assign
+                    button.btn.btn-success.btn-xs(type='button' data-toggle='modal' ng-click="checkAssignments(q.appointment_id);" data-target='#assignStaffModal') Assign
                   span(ng-if="2") 
                     // if user has access to treatment 
-                    a.btn.btn-success.btn-xs(href="/visit/home/{{q.visit}}") Treat
+                    a.btn.btn-success.btn-xs(href="/appointment/home/{{q.appointment}}") Treat
 
                 td {{ q.Wait_Time }}
                 td {{ q.Site_Name }}
@@ -162,3 +174,19 @@ block content
                 div#insideModal
               div.modal-footer
                 button.btn.btn-default(type="button button-danger" data-dismiss="modal") Close
+
+        if debugMode
+          hr(style='border-width:thick; border-color:black;')
+          .container(style='width:90%')
+            h3 Development Feedback (for Debugging purposes only) :
+
+            if User
+              div.alert.alert-warning User: #{JSON.stringify(User)}
+            if clinic
+              div.alert.alert-danger Clinic: #{JSON.stringify(clinic)}
+            if patient
+              div.alert.alert-danger Patient: #{JSON.stringify(patient)}
+            if treatment
+              div.alert.alert-danger Treatment: #{JSON.stringify(treatment)}
+           if Config 
+              div.alert.alert-danger Config: #{JSON.stringify(Config)}
