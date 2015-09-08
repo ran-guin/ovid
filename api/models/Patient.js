@@ -63,20 +63,20 @@ module.exports = {
       console.log('load patient history...');
 
       var detailed = 0;
-      var fields = ['vaccine.name as vaccine', 'visit.date', 'expiry', 'reactionLevel', 'reactionNotes'];
+      var fields = ['vaccine.name as vaccine', 'appointment.date', 'expiry', 'reactionLevel', 'reactionNotes'];
 
       if (detailed) {
         fields.push(['route', 'site', 'staff_id','clinic_id']);
         tables += ""
       }
 
-      var tables = "patient, visit, treatment, vaccine";
+      var tables = "patient, appointment, treatment, vaccine";
       var left_joins = [];
 
       var conditions = [
-          'visit.patient_id = patient.id',
+          'appointment.patient_id = patient.id',
           'vaccine.id = treatment.vaccine_id',
-          'visit.id = treatment.visit_id',
+          'appointment.id = treatment.appointment_id',
       ];
 
       if ( input['patient_id'] ) { conditions.push("patient.id = " + input['patient_id']) }
