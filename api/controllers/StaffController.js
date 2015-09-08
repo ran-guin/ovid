@@ -37,15 +37,15 @@ module.exports = {
 		var clinic = req.param('clinic');
 
 		var tables = 'staff';
-		var condition = [];
-		if (id)  condition.push("staff.id = " + id) 
+		var conditions = [];
+		if (id)  conditions.push("staff.id = " + id) 
 		if (clinic) { 
 			tables += ', clinic_staff'; 
-			condition.push("clinic_staff.staff_id=staff.id AND clinic_id = " + clinic);
+			conditions.push("clinic_staff.staff_id=staff.id AND clinic_id = " + clinic);
 		}
 
 		var query = "SELECT * from " + tables;
-		if (condition.length > 0)  query += " WHERE " + condition.join(' AND ');
+		if (conditions.length > 0)  query += " WHERE " + conditions.join(' AND ');
 		console.log("staff Q: " + query);
 
  		Staff.query(query, function (err, result) {
@@ -62,6 +62,66 @@ module.exports = {
 	
 		});
 	},
+
+	schedule: function (req, res) {
+		var clinic = req.param('clinic');
+		var start = req.param('start');
+		var end = req.param('end');
+		var staff = req.param('staff');
+
+		var tables = 'appointment';
+
+		var conditions = [];
+		
+		if (staff)  conditions.push("staff.id = " + staff)
+		if (clinic) { 
+			tables += ', clinic_staff'; 
+			conditions.push("clinic_staff.staff_id=staff.id AND clinic_id = " + clinic);
+		}
+
+		var fields = ['vaccinator_id', 'startTime', 'endTime', 'patient_id', 'appointment.id as appointment_id'];
+		var left_joins = [];
+
+		var query = "SELECT " + fields.join(',');
+		if (tables) query += ' FROM (' + tables + ')';
+		if (left_joins.length) { query += " LEFT JOIN " + left_joins.join(' LEFT JOIN ') }
+		if (conditions.length) { query += " WHERE " + conditions.join(' AND ') }
+
+		console.log("schedule query: " + query);
+
+ 		Staff.query(query, function (err, result) {
+			if (err) {
+				return res.negotiate(err);
+     		}
+
+			if (!result) {
+				console.log('no results');
+				return res.send('');
+			}
+
+			var schedule = {};
+			for (var i=0; i<result.length; i++) {
+				var staff_id = result[i]['vaccinator_id'];
+				if (! schedule[staff_id]) {
+					schedule[staff_id] = {};
+					schedule[staff_id]['starts'] = [];
+					schedule[staff_id]['ends'] = [];
+					schedule[staff_id]['patients'] = [];
+					schedule[staff_id]['bookings'] = [];
+					schedule[staff_id]['appointments'] = [];
+				}
+				
+				schedule[staff_id]['starts'].push(result[i]['startTime']);
+				schedule[staff_id]['ends'].push(result[i]['endTime']);
+				schedule[staff_id]['patients'].push(result[i]['patient_id']);
+				schedule[staff_id]['appointments'].push(result[i]['appointment_id']);
+				schedule[staff_id]['bookings'].push( result[i]['startTime'] + '-' + result[i]['endTime']);
+			}
+			return res.send(schedule);
+	
+		});		
+	},
+
 
 	edit: function (req, res) {
 		console.log("Edit...");
