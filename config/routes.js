@@ -90,9 +90,6 @@ module.exports.routes = {
   
   'GET /appointment/home/:id' : 'AppointmentController.home',
 
-  'GET /visit/home' : 'VisitController.home',
-  'GET /visit/home/:id' : 'VisitController.home',
-
   'GET /staff/load':   'StaffController.load',
   'GET /staff/list':   'StaffController.list',
   'GET /staff/manage': 'StaffController.manage',
