@@ -84,15 +84,6 @@ module.exports = {
         clinic_id = input['clinic_id'];
         conditions.push("clinic.id = " + input['clinic_id']);
       }
-
-     if (input['appointment_id']) { 
-        tables += ", appointment, patient, region";
-        conditions.push("appointment.id =" + input['appointment_id']);
-        conditions.push("appointment.patient_id=patient.id");
-        conditions.push("patient.region_id = region.id");
-
-        fields.push('patient.firstName', 'patient.lastName', 'patient.gender', "DATE_FORMAT(patient.birthdate,'%b %d, %Y') as birthdate", 'position', 'appointment.patient_id', "FLOOR(DATEDIFF(CURDATE(), birthdate)/365) as age", "region.name as location");
-      }
  
       var query = "SELECT " + fields.join(',');
       if (tables) query += ' FROM (' + tables + ')';
@@ -100,7 +91,7 @@ module.exports = {
       if (conditions.length) { query += " WHERE " + conditions.join(' AND ') }
       if (group.length) { query += " GROUP BY " + group.join(',') }
 
-      console.log("Q: " + query);
+      console.log("Clinic Query: " + query);
     
       Clinic.query(query, function (err, result) {
         if (err || (result == undefined) ) { 
@@ -125,20 +116,6 @@ module.exports = {
           }
          
           var info = {};
-        
-          if (result[0]['patient_id']) {
-              info['patient'] = {
-                id: result[0]['patient_id'],
-                firstName: result[0]['firstName'],
-                lastName: result[0]['lastName'],
-                name: result[0]['firstName'] + ' ' + result[0]['lastName'],
-                gender: result[0]['gender'],
-                birthdate: result[0]['birthdate'],
-                age: result[0]['age'],
-                location: result[0]['location'],
-                appointment_id: result[0]['appointment_id'],
-              }
-          }
 
           info['clinic'] = {
             id: result[0]['clinic_id'],
@@ -148,28 +125,21 @@ module.exports = {
           };
 
           if (clinic_id) {
-            // Load appointments  
-            var tables = "patient, appointment";
-            var fields = ['lastName', 'firstName','gender', "DATE_FORMAT(patient.birthdate,'%b %d, %y') as birthdate",'patient.id as patient_id'];
-            fields.push(['appointment.id as appointment_id', 'position', 'arrivalTime', 'startTime', 'vaccinator_id']);
-            fields.push(['Vuser.name as Vaccinator']);
+            // Load appointments             
+            Appointment.load({'clinic_id' : clinic_id}, function (err, result) {          
+              if (err) {  return res.negotiate(err) }
 
-            var left_joins = [
-              'staff as V ON vaccinator_id=V.id',
-              'user as Vuser ON Vuser.id = V.user_id'
-            ];
-
-            var conditions = ['patient_id=patient.id', 'clinic_id = ' + clinic_id];
-
-            var query = "SELECT " + fields.join(',');
-            if (tables) query += ' FROM (' + tables + ')';
-            if (left_joins.length) { query += " LEFT JOIN " + left_joins.join(' LEFT JOIN ') }
-            if (conditions.length) { query += " WHERE " + conditions.join(' AND ') }
-            console.log("Q: " + query);
-
-            Clinic.query(query, function (err, result) {
-              if (err) { return cb(err) }
-              info['clinic']['appointments'] = result;
+              if (!result) {
+                console.log('no results');
+                return res.send('');
+              }
+              
+              if (result['appointments']) {
+                info['clinic']['appointments'] = result['appointments'];
+              }
+              if (result['schedule']) {
+                info['schedule'] = result['schedule'];
+              }
               return cb(null, info);
             });
           }  
@@ -178,11 +148,7 @@ module.exports = {
             return cb(null, info);
           }
         }
-        else { 
-            console.log("no clinic id");
-            return cb("NO RESULT");
-        }
-
+       
     });     
 
   }

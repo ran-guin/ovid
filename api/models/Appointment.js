@@ -76,14 +76,18 @@ module.exports = {
         conditions.push("appointment.patient_id=patient.id");
         conditions.push("patient.region_id = region.id");
 
-      	conditions.push("appointment.id =" + input['appointment_id']);
+        if (input['appointment_id']) {
+      		conditions.push("appointment.id =" + input['appointment_id']);
+		}
+       	if (input['clinic_id']) {
+      		conditions.push("clinic.id =" + input['clinic_id']);
+		}
 
-      	var patientFields = ['patient.id as patient_id', 'patient.firstName', 'patient.lastName', 'patient.gender', "DATE_FORMAT(patient.birthdate,'%b %d, %Y') as birthdate", "FLOOR(DATEDIFF(CURDATE(), birthdate)/365) as age", "region.name as location"];
+      	var patientFields = ['patient.id as patient_id', 'patient.firstName', 'patient.lastName', 'patient.gender', "birthdate", "FLOOR(DATEDIFF(CURDATE(), birthdate)/365) as age", "region.name as location"];
         fields.push(patientFields);
 
 		var left_joins = [
-			"clinic_staff AS CS ON CS.clinic_id=clinic.id",
-			"staff ON CS.staff_id=staff.id",
+			"staff ON appointment.staff_id=staff.id",
 			"user on staff.user_id=user.id"
 		];
 
@@ -94,7 +98,7 @@ module.exports = {
 		if (conditions.length) { query += " WHERE " + conditions.join(' AND ') }
 		if (group.length) { query += " GROUP BY " + group.join(',') }
 
-		console.log("Q: " + query);
+		console.log("Appointment Query: " + query);
     
 		Appointment.query(query, function (err, result) {
 			if (err || (result == undefined) ) { 
@@ -104,18 +108,7 @@ module.exports = {
 
         	console.log("Appointment INFO: " + JSON.stringify(result));
 
-        	info['appointment'] = result[0];
-
-        	// load patient fields 
-        	info['patient'] = {
-        		id : result[0]['patient_id'],
-        		firstName : result[0]['firstName'],
-                lastName : result[0]['lastName'],
-        		gender : result[0]['gender'],
-        		birthdate : result[0]['birthdate'],
-        		age : result[0]['age'],
-        		location : result[0]['location'],
-        	};
+        	info['appointments'] = result;
 
 	        var scheduled = [];
 	        var treatments = [];
