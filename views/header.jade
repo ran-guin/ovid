@@ -14,7 +14,10 @@ head
     //      + Change the order of your CSS files
     //      + Import stylesheets from other directories
     //      + Use a different or additional preprocessor, like SASS, SCSS or Stylus
-    
+
+    // customize baseURL to enable reverse proxy to work for links (also change tasks/register/default.js to use linkAssets instead of linkAssetsBuild
+    base(href=req.baseUrl + "/ovid")
+
     // STYLES
     link(rel="stylesheet", href="/styles/angular-toastr.css")
     link(rel="stylesheet", href="/styles/bootstrap.3.1.1.css")
