@@ -76,8 +76,12 @@ block content
                     b &nbsp; ( {{clinic.staff.length}} staff currently assigned to this clinic)
 
           hr
-          h3 Queue:
-          div(ng-if="clinic.appointments.length")
+          h3 Queue: [ {{items.length}} = {{ clinic.appointments.length }}]
+
+          h5 Items:
+          h6 {{ JSON.stringify(items) }}
+
+          div(ng-if="items.length")
             table.table.table-bordered
               tr.active
                 td &nbsp;
@@ -101,7 +105,7 @@ block content
                   b Session          
                 td 
                   b Status
-              tr(ng-repeat="q in clinic.appointments")
+              tr(ng-repeat="q in items")
                 td
                   button.btn.btn-danger.btn-xs(type='button' value="Delete" ng-click="deleteItem($index)") X
                   span &nbsp;
@@ -114,13 +118,17 @@ block content
                 td {{ q.birthdate }} 
                 td {{ q.identifier_type }} {{ q.identiferType }}
                 td 
-                  span(ng-if="q.Vaccinator")
-                    b {{ q.Vaccinator }}
-                  span(ng-if="!q.Vaccinator")
-                    button.btn.btn-success.btn-xs(type='button' data-toggle='modal' ng-click="checkAssignments(q.appointment_id);" data-target='#assignStaffModal') Assign
-                  span(ng-if="2") 
-                    // if user has access to treatment 
-                    a.btn.btn-success.btn-xs(href="/appointment/home/{{q.appointment}}") Treat
+                  table(width='100%')
+                    tr
+                      td
+                        span(ng-if="q.Vaccinator")
+                          b {{ q.Vaccinator }}
+                        span(ng-if="!q.Vaccinator")
+                          button.btn.btn-warning.btn-xs(type='button' data-toggle='modal' ng-click="checkAssignments(q.appointment_id);" data-target='#assignStaffModal') Assign
+                      td(align='right')
+                        span(ng-if="2") 
+                          // if user has access to treatment 
+                          a.btn.btn-primary.btn-xs(href="/appointment/home/{{q.appointment}}") Treat
 
                 td {{ q.Wait_Time }}
                 td {{ q.Site_Name }}
