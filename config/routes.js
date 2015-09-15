@@ -52,6 +52,11 @@ module.exports.routes = {
   // Test views directly 
   'GET /test/:option': 'TestController.test',
 
+  'GET /demo/test': 'DemoController.test',
+  'GET /demo/patient': 'DemoController.patient',
+  'GET /demo/clinic': 'DemoController.clinic',
+  'GET /demo/appointment': 'DemoController.appointment',
+
   // Default User pages 
   'GET /user/dashboard/:id': 'UserController.dashboard',
   'GET /user/:id': 'UserController.dashboard',

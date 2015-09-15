@@ -28,6 +28,9 @@ module.exports.policies = {
 
   // '*': true,
   '*': 'flash',
+  'demo' : {
+      '*' : true
+  },
   user: {
       'new' : "flash",
       'signup' : "flash",
