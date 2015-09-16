@@ -148,8 +148,6 @@ app.factory('Nto1Factory', function($rootScope, $http){
           label_regex = new RegExp('\\b' + label + '\\b');
           field_regex = new RegExp('\\b' + field + '\\b');
 
-          console.log("F: " + field_regex);
-
           if (autocomplete && autocomplete['search']) {
             if (autocomplete['search'].match(label_regex) || autocomplete['search'].match(field_regex)) {
               this.SearchOn.push(itemColumns[i]);

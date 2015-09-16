@@ -263,6 +263,21 @@ app.controller('Nto1Controller',
 
     }
 
+    $scope.dumpHash = function (hash) {
+        var keys = Object.keys(hash);
+        if (keys && keys.length) {
+            for (var i=0; i<keys.length; i++) {
+                console.log("** : " + keys[i] + " = " + JSON.stringify(hash[keys[i]] ));
+            }
+        }
+        else if (keys) {
+            console.log("hash is empty");
+        }
+        else {
+            console.log("argument is not a hash");
+        }
+    }
+
     $scope.dumpScope = function () {
         console.log("*** Dumped Attribute List **");
         for (var i= 0; i<$scope.attributes.length; i++) {
@@ -354,9 +369,11 @@ app.controller('Nto1Controller',
     /********** Delete Item **********/
     $scope.deleteItem = function ( index ) {
         console.log('Remove item :' + index);
+        console.log("initial length: " + $scope.items.length);
         $scope.items.splice(index, 1); 
-        $scope.notePendingChange("Deleted Item(s)");    
-    }
+        $scope.notePendingChange("Deleted Item(s) " + index);    
+        console.log("new length: " + $scope.items.length);
+   }
         
     $scope.notePendingChange = function (message) {
         $scope.pendingChanges.push(message);

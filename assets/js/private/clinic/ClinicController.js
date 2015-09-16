@@ -25,16 +25,16 @@ app.controller('ClinicController',
         }
         if ($scope.items) {
             for (var i=0; i < $scope.items.length; i++) {
-                $scope.items[i].Wait_Time = Nto1Factory.timediff($scope.items[i].Arrival_Time, $scope.now);
+                if ($scope.$parent.items[i].Arrival_Time) {
+                    $scope.$parent.items[i].Wait_Time = Nto1Factory.timediff($scope.items[i].Arrival_Time, $scope.now);
+                }
             }
         }
         $scope.$apply();
     }, update_seconds*1000);
 
 
-    $scope.exampleData = [ {'id' : 1, 'label' : 'ABCDEFG'}, { 'id': 2, 'label' : 'HIJKLMNOP'}];
-    $scope.Clinics = [];
-    $scope.title = "TEST TITLE";
+    $scope.$parent.Clinics = [];
 
     /** run PRIOR to standard initialization  */
     $scope.setup = function (config) {
@@ -70,7 +70,7 @@ app.controller('ClinicController',
             { field : 'identifier'},
             { field : 'identifierType'},
             { field : 'gender'},
-            { field : "DATE_FORMAT(patient.birthdate,'%b %d, %y')", label: 'birthdate', type: 'date'},
+            { field : 'birthdate', type: 'date'},
             { field : 'appointment.status', hidden: 1},
   //          { field : 'queue.position', hidden: 1},
   //         { field : 'Wait_Time', hidden: 1},
@@ -111,8 +111,8 @@ app.controller('ClinicController',
             search : "patient_id,lastName,firstName,identifier, gender,birthdate",
             hide: 'patient_id',
             query_table : "patient",
-            query_field : "patient.id as patient_id,lastName,firstName,gender,identifier, DATE_FORMAT(patient.birthdate,'%b %d, %y') as birthdate, position",
-            query_condition : "1",
+            query_field : "patient.id as patient_id,lastName,firstName,gender,identifier, birthdate",
+            query_condition : 1,
             // query : "SELECT DISTINCT User_Name,Request_Date,Item_Request_ID,Item_Category_Description,Unit_Qty,Item_Name,Item_Catalog,Vendor_ID,Vendor_Name, CASE WHEN Unit_Cost IS NULL THEN Item_Cost ELSE Unit_Cost END as Unit_Cost,Item_Request_Notes,Deliver_To, Item_Request_Notes FROM (Item, Item_Request, Request, User) JOIN Item_Category ON FK_Item_Category__ID=Item_Category_ID LEFT JOIN Vendor ON Vendor_ID=FK_Vendor__ID WHERE FK_Request__ID=Request_ID AND FKRequester_User__ID=User_ID AND FK_Item__ID=Item_ID AND Request_ID=FK_Request__ID",
             set : "patient_id,lastName,firstName,identifier,gender,birthdate",
             // condition : "FK_Item_Category__ID IN (<Item_Category>)",
@@ -126,28 +126,42 @@ app.controller('ClinicController',
         $scope.$parent.setup(config);
     }
 
-      $scope.syncLookup = function (attribute, id, label) {
+    $scope.syncLookup = function (attribute, id, label) {
           console.log("sync " + attribute);
           console.log(JSON.stringify($scope[attribute]));
           $scope.$parent[id] = $scope[attribute]['id'];
           $scope.$parent[label] = $scope[attribute]['label'];
-      }
+    }
 
     $scope.initialize = function( config ) {
+        $scope.setup(config);
+        $scope.$parent.initialize(config);
 
-        console.log("local init: " + config);
+        console.log("Clinic init HASH: ");
+        
+        $scope.dumpHash(config);
+
         if (config && config['User']) { 
             console.log("loaded user attributes");
-            $scope.user = config['User'];
+            $scope.$parent.user = config['User'];
+            console.log(JSON.stringify($scope.user));
         }
         if (config && config['clinic']) { 
-            console.log("loaded clinic attributes");
-            $scope.clinic = config['clinic'];
+            console.log("loaded clinic attributes in clinic controller");
+            $scope.$parent.clinic = config['clinic'];
+            console.log(JSON.stringify($scope.clinic));
+            console.log("loaded clinic parent attributes :");
+            console.log(JSON.stringify($scope.$parent.clinic));
         }
         if (config && config['patient']) { 
             console.log("loaded patient attributes");
-            $scope.patient = config['patient'];
-        }       
+            $scope.$parent.patient = config['patient'];
+        } 
+        if (config && config['clinic'] && config['clinic']['appointments']) {
+            $scope.$parent.items = config['clinic']['appointments'];
+            console.log("Start with " + $scope.items.length);
+            console.log("loaded " + $scope.items.length + " clinic appointments");
+        }      
 
         $scope.$parent.highlightBackground = "background-color:#9C9;";
         var highlight_element = document.getElementById('clinicTab');
@@ -155,13 +169,9 @@ app.controller('ClinicController',
             highlight_element.style=($scope.highlightBackground)
         }
 
-        $scope.setup(config);
-
-        $scope.$parent.initialize(config);
-
         if ($scope.recordId) { $scope.loadRecord($scope.recordId) }
         else {
-            console.log("Initialize " + $scope.statusField + '=' + $scope.statusDefault);
+            console.log("Initialize " + $scope.$parent.statusField + '=' + $scope.statusDefault);
             if ($scope.statusField ) {
                 if ($scope[$scope.statusField] === undefined) {
                     $scope.$parent[$scope.statusField] = $scope.statusDefault;
@@ -170,6 +180,8 @@ app.controller('ClinicController',
                 Nto1Factory.setClasses($scope.statusOptions, $scope[$scope.statusField]);  
             }
         }
+            
+        console.log("still have " + $scope.items.length + " clinic appointments");
 
         $scope.ac_options = JSON.stringify($scope.Autocomplete);
 
@@ -179,34 +191,56 @@ app.controller('ClinicController',
 
   /********** Add Item to List of Requests **********/
     $scope.addItem = function( ) {
+        console.log("N# " + $scope.items.length);
         Nto1Factory.addItem( $scope.itemColumns, $scope.items );
+        console.log("N2# " + $scope.items.length);
+        
         var index = $scope.items.length - 1;
-        console.log('add patient to queue ');
+        console.log('added patient to queue ' + index);
 
         $scope.$parent.items[index].status = 'Queued';
         $scope.$parent.items[index].Arrival_Time = $scope.now;
         $scope.$parent.items[index].staff_id = $scope.user.id;
         $scope.$parent.items[index].clinic_id = $scope.clinic.id;
 
-       $scope.$parent.items[index].position = $scope.items.length;
+        $scope.$parent.items[index].position = $scope.items.length;
+
+        $scope.$parent.clinic.appointments[index] = $scope.items[index];
+//        $scope.clinic.appointments.push($scope.items[index]);  // add to clinic appointments which mirrors items... 
 
         var data = JSON.stringify($scope.items[index]);
 
         console.log("Data: " + data );
 
+        // update database ... 
         $http.post("/appointment", data)
         .then ( function (res) {
             console.log("Added queued patient");
             console.log(JSON.stringify(res));
+            console.log("N3# " + $scope.items.length);
 
         });
+    }
+
+    $scope.deleteItem = function (index) {
+        var deleted = $scope.items[index]['position'];
+
+        $scope.$parent.deleteItem(index);
+
+        for (var i=0; i< $scope.items.length; i++) {
+            if ($scope.items[index]['position'] > deleted ) {
+                $scope.$parent.items[index]['position']--;
+            }
+        }
+        // update database ... 
+
     }
 
     $scope.loadRecord = function (recordId) {
         var fields = $scope.Fields.join(',');
         var itemfields = $scope.itemFields.join(',');
         $scope.customQuery = "Select " + fields + ',' + itemfields;
-        $scope.loadCondition = $scope.mainClass + "_ID = '" + recordId + "'";
+        $scope.loadCondition = $scope.mainClass + ".id = '" + recordId + "'";
 
         $scope.customQuery += " FROM " + $scope.queryTables + " WHERE " + $scope.queryCondition + ' AND ' + $scope.loadCondition;
 
@@ -250,8 +284,8 @@ app.controller('ClinicController',
 
     $scope.changeDuty = function (index, status) {
         console.log("Reset duty to " + status)
-        if ($scope.clinic && $scope.clinic.staff[index]) {
-            $scope.clinic.staff[index].status = status;
+        if ($scope.$parent.clinic && $scope.clinic.staff[index]) {
+            $scope.$parent.clinic.staff[index].status = status;
         }
     }
 
@@ -271,13 +305,14 @@ app.controller('ClinicController',
         $scope.activeAppointment = appointment_id;
 
         var startTime;
-        var endTime;
+        var endTime; 
 
+        $scope.$parent.clinic.appointments = $scope.items;
         if ($scope.clinic && $scope.clinic.appointments) {
             for (var i=0; i< $scope.clinic.appointments.length; i++) {
-                if ( $scope.clinic.appointments[i]['id'] == appointment_id ) {
-                    startTime = $scope.appointments[i]['startTime'];
-                    endTime = $scope.appointments[i]['endTime'];
+                if ( $scope.$parent.clinic.appointments[i]['id'] == appointment_id ) {
+                    startTime = $scope.clinic.appointments[i]['startTime'];
+                    endTime = $scope.clinic.appointments[i]['endTime'];
                 }
             }
 
@@ -286,8 +321,8 @@ app.controller('ClinicController',
                 for (var i=0; i<$scope.clinic.staff.length; i++) {
                     var staff_id = $scope.clinic.staff[i]['id'];
                     if (response[staff_id]) {
-                        $scope.clinic.staff[i].schedule = response[staff_id]['bookings'].join("<BR>");
-                        $scope.clinic.staff[i].assignedTo = response[staff_id]['between'];
+                        $scope.$parent.clinic.staff[i].schedule = response[staff_id]['bookings'].join("<BR>");
+                        $scope.$parent.clinic.staff[i].assignedTo = response[staff_id]['between'];
                     }
                 }
             });
@@ -296,14 +331,14 @@ app.controller('ClinicController',
 
     $scope.assignStaff = function (index, staff_id) {
         console.log("Assign staff " + staff_id + ' to ' + $scope.activeAppointment);
-        $scope.clinic.staff[index]['assigned'] = $scope.activeAppointment;
-        $scope.clinic.staff[index]['assignedTo'] = $scope.activeAppointment;
+        $scope.$parent.clinic.staff[index]['assigned'] = $scope.activeAppointment;
+        $scope.$parent.clinic.staff[index]['assignedTo'] = $scope.activeAppointment;
    }
     
     $scope.deassignStaff = function (index, staff_id) {
         console.log(" DeAssign staff " + staff_id + ' from ' + $scope.clinic.staff[index]['assignedTo'] );
-        $scope.clinic.staff[index]['assigned'] = null;
-        $scope.clinic.staff[index]['assignedTo'] = null;
+        $scope.$parent.clinic.staff[index]['assigned'] = null;
+        $scope.$parent.clinic.staff[index]['assignedTo'] = null;
    }
     /********** Save Request and List of Items Requested **********/
     $scope.createRecord = function() {

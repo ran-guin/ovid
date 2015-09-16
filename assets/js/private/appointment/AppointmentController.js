@@ -98,25 +98,27 @@ app.controller('AppointmentController',
 
     $scope.initialize = function( config ) {
 
-        console.log("local init: " + JSON.stringify(config));
+        console.log("Appointment init: " + JSON.stringify(config));
         
         if (config && config['User']) { 
             console.log("loaded user attributes");
-            $scope.user = config['User'];
+            $scope.$parent.user = config['User'];
         }
         if (config && config['clinic']) { 
-            console.log("loaded clinic attributes");
-            $scope.clinic = config['clinic'];
+            console.log("loaded clinic attributes in Appointment init");
+            $scope.$parent.clinic = config['clinic'];
         }
         if (config && config['patient']) { 
             console.log("loaded patient attributes");
-            $scope.patient = config['patient'];
+            $scope.$parent.patient = config['patient'];
         }
-        if (config && config['appointment']) { 
-            console.log("loaded appointment attributes");
-            $scope.appointment = config['appointment'];
-        }
-
+ 
+        if (config && config['clinic'] && config['clinic']['appointments']) {
+            console.log("Start with " + $scope.items.length);
+            $scope.$parent.items = config['clinic']['appointments'];
+            console.log("loaded " + $scope.items.length + " clinic appointments");
+        }    
+ 
         $scope.$parent.highlightBackground = "background-color:#9C9;";
         var highlight_element = document.getElementById('clinicTab');
         if (highlight_element) {
@@ -139,7 +141,7 @@ app.controller('AppointmentController',
             }
         }
 
-        $scope.ac_options = JSON.stringify($scope.Autocomplete);
+        $scope.$parent.ac_options = JSON.stringify($scope.Autocomplete);
 
         $scope.$parent.manualSet = []; /* 'Request_Notes'];  /* manually reset */
     }
@@ -184,7 +186,7 @@ app.controller('AppointmentController',
                 'start'  : '2016-02-01',
             }
         ];
-        $scope.travel = travel;
+        $scope.$parent.travel = travel;
     }
 
     $scope.addBarcodedVaccine = function () {
@@ -209,8 +211,8 @@ app.controller('AppointmentController',
     }
 
     $scope.loadPatient = function (id) {
-        $scope.patient = {};
-        $scope.patient.id = id;
+        $scope.$parent.patient = {};
+        $scope.$parent.patient.id = id;
     }
 
 // move to ClinicController only ... 
@@ -234,7 +236,7 @@ app.controller('AppointmentController',
 
 //        $http.get(url + '/clinic/queue')
 
-        $scope.queued = queueExample;
+        $scope.$parent.queued = queueExample;
     }
 
     $scope.loadScheduledVaccinations = function () {
@@ -293,7 +295,7 @@ app.controller('AppointmentController',
 
         for (var i=0; i<$scope.items.length; i++) {
             console.log("Compare " + $scope.items[i]['Vaccine'] + ' with ' + vaccine['Vaccine']);
-            if ($scope.items[i]['Vaccine'] == vaccine['Vaccine']) {
+            if ($scope.$parent.items[i]['Vaccine'] == vaccine['Vaccine']) {
                 alreadyTracked = i;
             }
         }
@@ -307,7 +309,7 @@ app.controller('AppointmentController',
             .then ( function (response) {
                 console.log("added to database");
                 var index = $scope.items.length - 1;
-                $scope.items[index]['treatment_id'] = response['id'];
+                $scope.$parent.items[index]['treatment_id'] = response['id'];
                 return index;
             });
 
@@ -339,10 +341,10 @@ app.controller('AppointmentController',
     $scope.loadRecord = function (recordId) {
         var fields = $scope.Fields.join(',');
         var itemfields = $scope.itemFields.join(',');
-        $scope.customQuery = "Select " + fields + ',' + itemfields;
-        $scope.loadCondition = $scope.mainClass + "_ID = '" + recordId + "'";
+        $scope.$parent.customQuery = "Select " + fields + ',' + itemfields;
+        $scope.$parent.loadCondition = $scope.mainClass + "_ID = '" + recordId + "'";
 
-        $scope.customQuery += " FROM " + $scope.queryTables + " WHERE " + $scope.queryCondition + ' AND ' + $scope.loadCondition;
+        $scope.$parent.customQuery += " FROM " + $scope.queryTables + " WHERE " + $scope.queryCondition + ' AND ' + $scope.loadCondition;
 
         console.log($scope.customQuery);
         var url = '/api/q';
@@ -358,7 +360,7 @@ app.controller('AppointmentController',
             console.log('apply user  ' + $scope.user);
 
             $scope.updateTotals();
-            $scope.highlightBackground = "background-color:#9C9;";
+            $scope.$parent.highlightBackground = "background-color:#9C9;";
 
         });
 
@@ -408,7 +410,7 @@ app.controller('AppointmentController',
 
                 console.log(JSON.stringify($scope.createdRecords));
                 var created = $scope.createdRecords[$scope.createdRecords.length-1];
-                $scope.recordId = created['id'];
+                $scope.$parent.recordId = created['id'];
 
                 var link = "Queue #" + $scope.recordId + ' created : ' + created['description']
                 console.log('created Queue # ' + $scope.recordId);
