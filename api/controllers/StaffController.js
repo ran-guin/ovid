@@ -41,7 +41,7 @@ module.exports = {
 		if (id)  conditions.push("staff.id = " + id) 
 		if (clinic) { 
 			tables += ', clinic_staff'; 
-			conditions.push("clinic_staff.staff_id=staff.id AND clinic_id = " + clinic);
+			conditions.push("clinic_staff.staff=staff.id AND clinic = " + clinic);
 		}
 
 		var query = "SELECT * from " + tables;
@@ -76,10 +76,10 @@ module.exports = {
 		if (staff)  conditions.push("staff.id = " + staff)
 		if (clinic) { 
 			tables += ', clinic_staff'; 
-			conditions.push("clinic_staff.staff_id=staff.id AND clinic_id = " + clinic);
+			conditions.push("clinic_staff.staff=staff.id AND clinic = " + clinic);
 		}
 
-		var fields = ['vaccinator_id', 'startTime', 'endTime', 'patient_id', 'appointment.id as appointment_id'];
+		var fields = ['vaccinator', 'startTime', 'endTime', 'patient', 'appointment.id as appointment_id'];
 		var left_joins = [];
 
 		var query = "SELECT " + fields.join(',');
@@ -101,21 +101,21 @@ module.exports = {
 
 			var schedule = {};
 			for (var i=0; i<result.length; i++) {
-				var staff_id = result[i]['vaccinator_id'];
-				if (! schedule[staff_id]) {
-					schedule[staff_id] = {};
-					schedule[staff_id]['starts'] = [];
-					schedule[staff_id]['ends'] = [];
-					schedule[staff_id]['patients'] = [];
-					schedule[staff_id]['bookings'] = [];
-					schedule[staff_id]['appointments'] = [];
+				var Vaccinator_id = result[i]['vaccinator'];
+				if (! schedule[Vaccinator_id]) {
+					schedule[Vaccinator_id] = {};
+					schedule[Vaccinator_id]['starts'] = [];
+					schedule[Vaccinator_id]['ends'] = [];
+					schedule[Vaccinator_id]['patients'] = [];
+					schedule[Vaccinator_id]['bookings'] = [];
+					schedule[Vaccinator_id]['appointments'] = [];
 				}
 				
-				schedule[staff_id]['starts'].push(result[i]['startTime']);
-				schedule[staff_id]['ends'].push(result[i]['endTime']);
-				schedule[staff_id]['patients'].push(result[i]['patient_id']);
-				schedule[staff_id]['appointments'].push(result[i]['appointment_id']);
-				schedule[staff_id]['bookings'].push( result[i]['startTime'] + '-' + result[i]['endTime']);
+				schedule[Vaccinator_id]['starts'].push(result[i]['startTime']);
+				schedule[Vaccinator_id]['ends'].push(result[i]['endTime']);
+				schedule[Vaccinator_id]['patients'].push(result[i]['patient']);
+				schedule[Vaccinator_id]['appointments'].push(result[i]['appointment']);
+				schedule[Vaccinator_id]['bookings'].push( result[i]['startTime'] + '-' + result[i]['endTime']);
 			}
 			return res.send(schedule);
 	
