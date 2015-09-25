@@ -10,6 +10,10 @@ module.exports = {
 	home: function (req, res) {
 		var id = req.param('id') || 0;
 		console.log('clinic home');
+
+ 
+        if (!req.session.param) { req.session.param = {} }
+
 	    if (req.session && req.session.params) {
 	      var page = req.session.params.defaultPage || 'homepage';
 
@@ -18,17 +22,24 @@ module.exports = {
 	      req.session.params['page']['search_title'] = "Search for Patients using any of fields below";
 	      req.session.params['page']['add_to_scope'] = true;
 
-	      Clinic.load({'clinic_id' : id}, function (err, result) {	        
+	      Clinic.load( {'clinic_id' : id, include : { staff: true, appointments : true} }, function (err, result) {	        
 	        if (err) {  return res.negotiate(err) }
 
 	        if (!result) {
 	          console.log('no results');
 	          return res.send('');
 	        }
-	    	
-	    	console.log("RESULT:" + JSON.stringify(result));
 
-	    	req.session.params['clinic'] = result['clinic'];
+            var page = { 
+                item_Class : 'patient',
+                search_title : "Search for Patients using any of fields below",
+                add_to_scope : true
+            };
+
+            req.session.param['page'] = page;    
+	    	req.session.params['clinic'] = result;
+               
+             console.log("CLINIC PARAMS: " + JSON.stringify(req.session.params));
 
 	        res.render('clinic/Clinic', req.session.params);
 	      });
@@ -40,10 +51,6 @@ module.exports = {
 
 	},
 
-	/* separate load function only required when model loading requires information from multiple tables */
-	load: function (req, res) {
-
-	},
 
 	/* separate list function only required when query uses or retrieves information from multiple tables */
 	list: function (req, res) {
