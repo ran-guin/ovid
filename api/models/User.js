@@ -53,7 +53,16 @@ module.exports = {
             values.encryptedPassword = encryptedPassword;
             next();
         });
+    },
+
+    // Override toJSON instance method to hide password
+    toJSON: function() {
+      var obj = this.toObject();
+      delete obj.encryptedPassword;
+      return obj;
     }
-  }
+  },
+
+
 };
 
