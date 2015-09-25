@@ -66,7 +66,7 @@ module.exports = {
       var fields = ['vaccine.name as vaccine', 'appointment.date', 'expiry', 'reactionLevel', 'reactionNotes'];
 
       if (detailed) {
-        fields.push(['route', 'site', 'staff_id','clinic_id']);
+        fields.push(['route', 'site', 'staff','clinic']);
         tables += ""
       }
 
@@ -74,7 +74,7 @@ module.exports = {
       var left_joins = [];
 
       var conditions = [
-          'appointment.patient_id = patient.id',
+          'appointment.patient = patient.id',
           'vaccine.id = treatment.vaccine_id',
           'appointment.id = treatment.appointment_id',
       ];
