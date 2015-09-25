@@ -13,21 +13,21 @@ module.exports = {
 
   attributes: {
 
-  	user_id: {
-  		model: 'user',
-  	        extrainfo: 'testforextrainfo',
-        },
+    user_id: {
+      model: 'user',
+      extrainfo: 'testforextrainfo',
+    },
+
+    alias: {
+      type: 'string'
+    },
 
   	role: {
   		type: 'string',
   		enum: ['Desk Staff', 'Nurse', 'Doctor', 'Technician', 'Researcher' ],
-  	        xdesc: "Staff Position",
-        },
+      description: "Staff Position",
+    },
 
-        clinics: {
-            'collection': 'clinic',
-            via: 'staff'
-        }
   }
 };
 
