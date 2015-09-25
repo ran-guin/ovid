@@ -11,11 +11,11 @@ module.exports = {
 
   attributes: {
 
-  	appointment_id : {
+  	appointment : {
   		model: 'appointment',
   	},
 
-  	vaccine_id: {
+  	vaccine: {
   		model: 'vaccine',
   	},
  
