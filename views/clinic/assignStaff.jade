@@ -6,36 +6,37 @@ div
           thead
             tr.active
               th &nbsp;
-              th Staff
+              th Staffs
               th Position
               th Status
               th Assigned
-            tr(ng-repeat='emp in clinic.staff' ng-if="emp.role != 'Desk Staff'")
+            tr(ng-repeat='Vstaff in clinic.staff' ng-if="Vstaff.role != 'Desk Staff'")
               td
-                  //div(ng-if="emp.role != 'Desk Staff' ")
-                  span(ng-if="emp.assignedTo && emp.assignedTo == activeAppointment")
-                    button.btn.btn-danger.btn-xs(type='button' ng-click="deassignStaff($index, emp.id)") de-assign 
-                  span(ng-if= "emp.assignedTo != activeAppointment && emp.status == 'On Duty'")
-                    button.btn.btn-success.btn-xs(type='button' ng-click="assignStaff($index, emp.id)") assign
+                  //div(ng-if="Vstaff.role != 'Desk Staff' ")
+                  span(ng-if="Vstaff.assignedTo && Vstaff.assignedTo == activeAppointment")
+                    button.btn.btn-danger.btn-xs(type='button' ng-click="deassignStaff($index, Vstaff.id)") de-assign 
+                  span(ng-if= "Vstaff.assignedTo != activeAppointment && Vstaff.dutyStatus == 'On Duty'")
+                    button.btn.btn-success.btn-xs(type='button' ng-click="assignStaff($index, Vstaff.id)") assign
               td 
-                    b {{ emp.name }} [ {{ emp.id }} ]
+                    b {{ Vstaff.name }} [ {{ Vstaff.id }} ]
               td 
-                    b {{ emp.role }}
+                    b {{ Vstaff.role }}
               td
-                    span(ng-if="emp.assignedTo && emp.assignedTo == activeAppointment")
+                    span(ng-if="Vstaff.assignedTo && Vstaff.assignedTo == activeAppointment")
                       p.text-info Assigned
-                    span(ng-if="!emp.assignedTo && emp.assignedTo != activeAppointment && emp.status == 'On Duty'")
-                      p.text-success Available
-                    span(ng-if="!emp.assignedTo && emp.assignedTo != activeAppointment && emp.status != 'On Duty'")
-                      p.text-warning Off Duty
-                    span(ng-if="emp.assignedTo && emp.assignedTo != activeAppointment")
+                    span(ng-if="!Vstaff.assignedTo && Vstaff.assignedTo != activeAppointment && Vstaff.dutyStatus == 'On Duty'")
+                      p.text-success {{ Vstaff.dutyStatus }}
+                    span(ng-if="!Vstaff.assignedTo && Vstaff.assignedTo != activeAppointment && Vstaff.dutyStatus != 'On Duty'")
+                      p.text-warning {{ Vstaff.dutyStatus }}
+                    span(ng-if="Vstaff.assignedTo && Vstaff.assignedTo != activeAppointment")
                       p.text-danger  Busy         
               td
-                div(ng-if="emp.assignedTo")
-                  a.btn.btn-primary.btn-xs(href="/appointment/home/{{emp.assignedTo}}") 
-                    b Go
+                div(ng-if="Vstaff.assignedTo")
+                  a.btn.btn-primary.btn-xs(href="/appointment/home/{{Vstaff.assignedTo}}") 
+                    b 
+                      i.fa.fa-arrow-right
               td 
-                b {{emp.schedule}}
+                b {{Vstaff.schedule}}
         p
   hr
   

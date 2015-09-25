@@ -53,20 +53,20 @@ block content
                       //div(ng-repeat='emp in clinic.staff')
                         - var dutyClass = "active.active-success";
 
-                    tr.active(ng-if="emp.status != 'On Duty'" ng-repeat='emp in clinic.staff')
-                        td {{emp.name}}
-                        td {{emp.role}}
-                        td {{ emp.status }} &nbsp;
+                    tr.active(ng-if="Vstaff.dutyStatus != 'On Duty'" ng-repeat='Vstaff in clinic.staff')
+                        td {{ Vstaff.alias}}
+                        td {{ Vstaff.role}}
+                        td {{ Vstaff.dutyStatus }} &nbsp;
                         td
                             button.btn.btn-success.btn-xs(type='button' ng-click="changeDuty($index,'On Duty')") Place On Duty
 
-                    tr.success(ng-if="emp.status == 'On Duty'" ng-repeat='emp in clinic.staff')
+                    tr.success(ng-if="Vstaff.dutyStatus == 'On Duty'" ng-repeat='Vstaff in clinic.staff')
                         td 
-                          b {{emp.name}}
+                          b {{ Vstaff.alias}}
                         td 
-                          b {{emp.role}}
+                          b {{ Vstaff.role}}
                         td 
-                          b {{ emp.status }} &nbsp;
+                          b {{ Vstaff.dutyStatus }} &nbsp;
                         td
                           button.btn.btn-danger.btn-xs(type='button' ng-click="changeDuty($index,'Off Duty')") Take Off duty
    
@@ -105,30 +105,29 @@ block content
                   b Session          
                 td 
                   b Status
-              tr(ng-repeat="q in items")
+              tr(ng-repeat="q in clinic.appointments")
                 td
                   button.btn.btn-danger.btn-xs(type='button' value="Delete" ng-click="deleteItem($index)") X
                   span &nbsp;
                   button.btn.btn-warning.btn-xs(type='button' data-toggle='modal' data-target='#editItemModal') Edit
                 td         
                   span {{ q.position }} 
-
-                td {{ q.lastName }} 
-                td {{ q.firstName }}
-                td {{ q.birthdate }} 
-                td {{ q.identifier_type }} {{ q.identiferType }}
+                td {{ q.patient.lastName }} 
+                td {{ q.patient.firstName }}
+                td {{ q.patient.birthdate }} 
+                td {{ q.patient.identifier_type }} {{ q.patient.identiferType }}
                 td 
                   table(width='100%')
                     tr
                       td
-                        span(ng-if="q.Vaccinator")
-                          b {{ q.Vaccinator }}
-                        span(ng-if="!q.Vaccinator")
-                          button.btn.btn-warning.btn-xs(type='button' data-toggle='modal' ng-click="checkAssignments(q.appointment_id);" data-target='#assignStaffModal') Assign
+                        span(ng-if="q.vaccinator")
+                          b {{ q.vaccinator.alias }}
+                        span(ng-if="!q.vaccinator")
+                          button.btn.btn-warning.btn-xs(type='button' data-toggle='modal' ng-click="checkAssignments(q.id);" data-target='#assignStaffModal') Assign
                       td(align='right')
                         span(ng-if="2") 
                           // if user has access to treatment 
-                          a.btn.btn-primary.btn-xs(href="/appointment/home/{{q.appointment}}") Treat
+                          a.btn.btn-primary.btn-xs(href="/appointment/home/{{q.id}}") Treat
 
                 td {{ q.Wait_Time }}
                 td {{ q.Site_Name }}
@@ -186,15 +185,26 @@ block content
         if debugMode
           hr(style='border-width:thick; border-color:black;')
           .container(style='width:90%')
-            h3 Development Feedback (for Debugging purposes only) :
+            h3 Development Feedback (used for Debugging purposes only) :
 
             if User
               div.alert.alert-warning User: #{JSON.stringify(User)}
-            if clinic
-              div.alert.alert-danger Clinic: #{JSON.stringify(clinic)}
+            //- if clinic
+            //-   div.alert.alert-danger Clinic: #{JSON.stringify(clinic)}
             if patient
               div.alert.alert-danger Patient: #{JSON.stringify(patient)}
             if treatment
               div.alert.alert-danger Treatment: #{JSON.stringify(treatment)}
-           if Config 
+            if Config 
               div.alert.alert-danger Config: #{JSON.stringify(Config)}
+            if clinic && clinic.staff
+              div.alert.alert-danger Clinic Staff: 
+                ul
+                  li(ng-repeat = "staff in clinic.staff")
+                    b {{ staff }}
+            if clinic && clinic.appointments
+              div.alert.alert-danger Clinic Appointments: 
+                ul
+                  li(ng-repeat = "appointment in clinic.appointments")
+                    b {{appointment}}
+
