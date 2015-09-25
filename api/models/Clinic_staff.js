@@ -8,10 +8,10 @@
 module.exports = {
 
   attributes: {
-    staff_id : {
+    staff : {
         model : 'staff'
     },
-    clinic_id : {
+    clinic : {
         model : 'clinic'
     },
     
@@ -25,7 +25,11 @@ module.exports = {
     dutyStatus : {
         type: 'string',
         enum: ['On Duty', 'Off Duty']
-    }
+    },
+    
+    startDate : {
+        type : 'daate'
+    },
   }
 };
 
