@@ -375,9 +375,9 @@ function addRow (keys, values, Options, rowClass) {
         var regexp = new RegExp('\b' + k + '\b', 'g');
 
         if ( show && show.match(k) ) {
-            if (k == target) {
+            if (values && k == target) {
                 var onclick = "selectItem(<SELECTLINK>); return false; ";
-                v = "\n<A HREF='#' onclick=\"" + onclick + "\">" + v + "</A>\n";
+                v = "\n<button class='btn btn-primary' type='button' onclick=\"" + onclick + "\">" + v + "</button>\n";
             }
             html += "\t<TD>\n\t\t" + v + "\n\t</TD>\n";
         }

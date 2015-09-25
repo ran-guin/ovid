@@ -28,7 +28,7 @@ app.controller('AppointmentController',
             { field : 'clinic.address' },
             { field : 'user.name', label : 'Vaccinator'},
             { field : 'user.id', label : 'VaccinatorId', set: 1},
-            { field : 'patient_id' },
+            { field : 'patient' },
             { field : 'patient.name' },
             { field : 'patient.birthdate' },
             { field : 'appointment.id', label: 'appointment_id'},
@@ -62,7 +62,7 @@ app.controller('AppointmentController',
             $scope.queryTables += ' LEFT JOIN ' + leftJoins.join(' LEFT JOIN ');
         }
         
-        $scope.queryCondition = "appointment.clinic_id=clinic.id AND appointment.patient_id=patient.id AND appointment.staff_id=staff.id AND staff.user_id=user.id";
+        $scope.queryCondition = "appointment.clinic=clinic.id AND appointment.patient=patient.id AND appointment.staff=staff.id AND staff.user_id=user.id";
    
         $scope.Autocomplete = {
             url : '/api/search',

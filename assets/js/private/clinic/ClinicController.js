@@ -91,9 +91,9 @@ app.controller('ClinicController',
         /* Load Fields based on fields above using tables / condition below */
         $scope.queryTables = "(clinic, appointment)";
         var leftJoins = [
-            'patient ON appointment.patient_id=patient.id',
+            'patient ON appointment.patient=patient.id',
             'clinic_staff ON clinic_id=clinic.id',
-            'staff ON clinic_staff.staff_id=staff.id',
+            'staff ON clinic_staff.staff=staff.id',
             'user as Vaccinator ON Vaccinator.id=staff.user_id',
             'treatment ON treatment.appointment_id=appointment.id',
         ];
@@ -101,7 +101,7 @@ app.controller('ClinicController',
             $scope.queryTables += ' LEFT JOIN ' + leftJoins.join(' LEFT JOIN ');
         }
         
-        $scope.queryCondition = "appointment.clinic_id=clinic.id";
+        $scope.queryCondition = "appointment.clinic=clinic.id";
    
         $scope.Autocomplete = {
             url : '/api/search',
@@ -161,7 +161,14 @@ app.controller('ClinicController',
             $scope.$parent.items = config['clinic']['appointments'];
             console.log("Start with " + $scope.items.length);
             console.log("loaded " + $scope.items.length + " clinic appointments");
+        }
+
+        if (config && config['clinic'] && config['clinic']['staff']) {
+            $scope.$parent.staff = config['clinic']['staff'];
+            console.log("Start with " + $scope.items.length);
+            console.log("loaded " + $scope.items.length + " clinic appointments");
         }      
+
 
         $scope.$parent.highlightBackground = "background-color:#9C9;";
         var highlight_element = document.getElementById('clinicTab');
@@ -200,8 +207,8 @@ app.controller('ClinicController',
 
         $scope.$parent.items[index].status = 'Queued';
         $scope.$parent.items[index].Arrival_Time = $scope.now;
-        $scope.$parent.items[index].staff_id = $scope.user.id;
-        $scope.$parent.items[index].clinic_id = $scope.clinic.id;
+        $scope.$parent.items[index].staff = $scope.user.id;
+        $scope.$parent.items[index].clinic = $scope.clinic.id;
 
         $scope.$parent.items[index].position = $scope.items.length;
 
@@ -283,9 +290,12 @@ app.controller('ClinicController',
     }
 
     $scope.changeDuty = function (index, status) {
-        console.log("Reset duty to " + status)
         if ($scope.$parent.clinic && $scope.clinic.staff[index]) {
-            $scope.$parent.clinic.staff[index].status = status;
+            $scope.$parent.clinic.staff[index].dutyStatus = status;
+            console.log("Reset duty to " + status);
+
+            console.log("Reset duty: " + JSON.stringify($scope.clinic.staff));
+           
         }
     }
 
