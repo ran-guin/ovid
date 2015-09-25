@@ -5,6 +5,8 @@
 * @docs        :: http://sailsjs.org/#!documentation/models
 */
 
+var Q = require('q');
+
 module.exports = {
 
   tableName     : 'clinic',
@@ -61,96 +63,139 @@ module.exports = {
     	defaultsTo: 'Pending'
     },
 
-    staff: {
-        collection: 'staff',
-        via: 'clinics'
-    }
+    autoload: {
+      type : 'query',
+      tables : ['clinic'],
+      fields : [ 'clinic.name as clinic', 'clinic.id as clinic_id', 'clinic.address', 
+      ],
+      include : {
+        'staff' : {
+            fields : ['user.name as user', 'staff.id as staff_id', 'user.name as staff', 'staff.role', 'CS.dutyStatus'],
+            left_joins : [
+              "clinic_staff AS CS ON CS.clinic_id=clinic.id",
+              "staff ON CS.staff_id=staff.id",
+              "user ON staff.user_id=user.id"
+            ],
+        },
+      },
+      on : {
+        'clinic_id' : {
+            conditions : [ "clinic.id = INPUTVALUE" ]
+        },
+      }
+    },
   },
 
   load: function (input, cb) {
-          var fields = ['clinic.name as clinic', 'clinic.id as clinic_id', 'clinic.address', 'user.name as user', 'staff.id as staff_id', 'user.name as staff', 'staff.role', 'CS.dutyStatus'];
-          var tables = "clinic";
-          var left_joins = [
-             "clinic_staff AS CS ON CS.clinic_id=clinic.id",
-            "staff ON CS.staff_id=staff.id",
-            "user on staff.user_id=user.id"
-          ];
+      // separate load function only required to dynamically load staff & appointments
+      // this may not be needed if sails / Waterline is updated to support join tables with extra custom fields ...
 
-      var conditions = [];
-      var group = [];
-
-      var clinic_id;
-      if ( input['clinic_id'] ) { 
-        clinic_id = input['clinic_id'];
-        conditions.push("clinic.id = " + input['clinic_id']);
-      }
- 
-      var query = "SELECT " + fields.join(',');
-      if (tables) query += ' FROM (' + tables + ')';
-      if (left_joins.length) { query += " LEFT JOIN " + left_joins.join(' LEFT JOIN ') }
-      if (conditions.length) { query += " WHERE " + conditions.join(' AND ') }
-      if (group.length) { query += " GROUP BY " + group.join(',') }
-
-      console.log("Clinic Query: " + query);
+      // adapt to only tweak sails query hash based on possible input parameters... (needed ?)
+      //query = sails.sql_helper.build_Query(Clinic, input);
     
-      Clinic.query(query, function (err, result) {
-        if (err || (result == undefined) ) { 
-          console.log("No result...");
-          return cb(err)
-        }
+      var clinic_id = input['clinic_id'] || 2;
 
-        console.log("CLINIC INFO: " + JSON.stringify(result));
+      Clinic.findOne( { id : clinic_id} )
+      .then ( function (clinicData) {
+        console.log("CLINIC INFO: " + JSON.stringify(clinicData));
+        // if (err) { console.log("ERR IN clninic query..."); return cb(err); }
+ 
+        var info = {};
+ 
+        if (clinicData) {
 
-        var clinicStaff = [];
-        var appointments = [];
+          info = clinicData || {};
 
-        if (result) {
-          for (var i=0; i<result.length; i++) {
-            var staffInfo = {
-              'id' : result[i]['staff_id'],
-              'name' : result[i]['staff'],
-              'role' : result[i]['role'],
-              'status' : result[i]['dutyStatus'],
-            }
-            clinicStaff.push(staffInfo);
-          }
-         
-          var info = {};
+          if (input['include'] ) {
+            console.log("LOAD appointments & staff");
+            Q.all([
+              Clinic.getAppointments(clinicData.id),
+              Clinic.getStaff(clinicData.id)
+            ])
+            .then ( function (result) {
+                info['appointments'] = result[0];
+                info['staff'] = result[1];
+               return cb(null, info);
+            })
+            .catch( function (err) {
+              return cb(err);
+            });
 
-          info['clinic'] = {
-            id: result[0]['clinic_id'],
-            name: result[0]['clinic'],
-            address: result[0]['address'],
-            staff: clinicStaff,
-          };
-
-          if (clinic_id) {
+        /*
             // Load appointments             
-            Appointment.load({'clinic_id' : clinic_id}, function (err, result) {          
-              if (err) {  return res.negotiate(err) }
+            console.log("load appointments...");
+            Appointment.find({ clinic : clinicData.id }).populateAll()
+            .then ( function ( appointmentData ) {  
+                console.log("checking for appointments...");        
 
-              if (!result) {
-                console.log('no results');
-                return res.send('');
-              }
-              
-              if (result['appointments']) {
-                info['clinic']['appointments'] = result['appointments'];
-              }
-              if (result['schedule']) {
-                info['schedule'] = result['schedule'];
-              }
-              return cb(null, info);
+                if (appointmentData) {
+                  console.log("Appointment Data: " + JSON.stringify(appointmentData));
+                  info['appointments'] = appointmentData;
+                }
+                else {
+                  console.log('no Appointments');
+                }
+                return cb(null, info);
             });
           }  
           else { 
-            console.log("no clinic id");                  
+            console.log("no appointment data");                  
             return cb(null, info);
           }
+        */
+          }
+          else { return cb(null, info) }
         }
-       
-    });     
+        else { 
+          console.log("no clinic data");                  
+          return cb(null, info);
+        }      
+    })
+    .catch ( function (err) {
+      console.log("Error: " + err);
+      return ("no data");
+    });
+    
+  }, 
 
+  test: function (id) {
+    console.log('testid');
+    return [{name: 'Ran', role: 'Doc'}];
+  },
+
+  getStaff: function (clinic_id) {
+
+
+    console.log("load staff for clinic " + clinic_id);
+
+    return Clinic_staff.find({ clinic : clinic_id }).populate('staff')
+    .then ( function ( staffData ) {  
+        console.log("checking for staff..."); 
+
+        return Record.join_data({ join : staffData, to : 'staff'});
+    })
+    .catch ( function (err) {
+      console.log("Errors: " + err);
+      return;
+    });
+  },
+
+
+  getAppointments: function (clinic_id) {
+    console.log("load appointments for clinic " + clinic_id);
+    return Appointment.find({ clinic : clinic_id }).populate('vaccinator').populate('patient')
+    .then ( function ( appointmentData ) {  
+        console.log("checking for appointments...");        
+
+        if (appointmentData) {
+          console.log("Appointment Data: " + JSON.stringify(appointmentData));
+          return appointmentData;
+        }
+        else {
+          console.log('no Appointments');
+          return [];
+        }
+    });
   }
 
 };
