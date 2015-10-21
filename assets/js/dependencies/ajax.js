@@ -265,7 +265,7 @@ function parseData (data, Options, match) {
         var val = data[i];
         var kv = subObjects(val);
         if (kv) {
-            if (!records) { 
+            if ( !records ) { 
                 html += "<THEAD class='alert alert-success'>\n";
                 html += addRow(kv[0], null, Options, 'success');
                 html += "</THEAD>\n<TBODY>\n";
@@ -375,7 +375,8 @@ function addRow (keys, values, Options, rowClass) {
         var regexp = new RegExp('\b' + k + '\b', 'g');
 
         if ( show && show.match(k) ) {
-            if (values && k == target) {
+            if (headerOnly) { v = "<B>" + v + "</B>" }
+            else if ( v && k == target) {
                 var onclick = "selectItem(<SELECTLINK>); return false; ";
                 v = "\n<button class='btn btn-primary' type='button' onclick=\"" + onclick + "\">" + v + "</button>\n";
             }
