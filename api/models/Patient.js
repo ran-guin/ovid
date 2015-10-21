@@ -67,6 +67,40 @@ module.exports = {
     }
   },
 
+  load : function (input, cb) {
+
+    var data = {};
+
+    var conditions = {};
+    if (input.user) { conditions.user = input.user }
+    if (input.patient) {conditions.id = input.patient }
+
+    Patient.findOne( conditions )
+    .then ( function (patientData) {
+      
+      data.patient = patientData;
+      var patient_id = patientData.id;
+
+      Treatment.find( { where : { patient : patient_id, status : ['Active'] } , sort : 'applied desc' } )   
+          .populate('appointment')
+          .populate('vaccine')
+          .exec( function (err, treatments ) {
+   //           if (err) { return res.send({ Error: err, message : "Error retrieving Treatments " }) }
+            if (err) { cb("Error retrieving treatments: " + err) }
+            
+            console.log('got treatments ' + JSON.stringify(treatments));
+            data['treatments'] = treatments;
+
+            Recommendation.load({ patient_id : patient_id, treatments: treatments} , function (err, recommendation) {
+                  data['schedule'] = recommendation.schedule;
+                   data['protectionMap'] = recommendation.protectionMap;
+                 
+                  cb(null, data);   
+            });  
+      });
+    });
+  },
+
 
   loadHistory : function (input, cb) {
 
