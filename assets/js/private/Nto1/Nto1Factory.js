@@ -253,7 +253,7 @@ app.factory('Nto1Factory', function($rootScope, $http){
   }
 
   /********** Add Item to List  **********/
-  service.addItem = function( columnData, currentItems) {
+  service.addItem = function( columnData, currentItems, scope) {
         if (currentItems) { this.items = currentItems }
           
         console.log('smart add item in service ' + typeof currentItems);
@@ -282,11 +282,12 @@ app.factory('Nto1Factory', function($rootScope, $http){
             }
         }
 
-        console.log(JSON.stringify(thisitem));
-        console.log(JSON.stringify(this.items));
+        var add = {};
+        if (scope) { add[scope] = thisitem }
+        else { add = thisitem }
 
-        this.items.push( thisitem );
-        console.log(JSON.stringify(this.items));
+        this.items.push( add );
+        console.log(JSON.stringify(add));
 
         console.log('added item via service ...');
 
