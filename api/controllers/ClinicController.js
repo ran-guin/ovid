@@ -39,7 +39,7 @@ module.exports = {
             req.session.param['page'] = page;    
 	    	req.session.params['clinic'] = result;
                
-             console.log("CLINIC PARAMS: " + JSON.stringify(req.session.params));
+            console.log("CLINIC PARAMS: " + JSON.stringify(req.session.params));
 
 	        res.render('clinic/Clinic', req.session.params);
 	      });
