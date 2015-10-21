@@ -8,10 +8,13 @@
 module.exports = {
 
   attributes : {
-    patient_id : {
+    patient : {
         model: 'patient'
     },
-    vaccine_id : {
+    disease : {
+        model: 'disease'
+    },
+    vaccine : {
         model: 'vaccine'
     },
     due : {
@@ -27,7 +30,7 @@ module.exports = {
     },
     status : {
         type: 'string',
-        enum: ['Scheduled','Scanned', 'Declined','Taken']
+        enum: ['Active','Expired', 'Unknown']
     },
     notification_status : {
         type: 'string',

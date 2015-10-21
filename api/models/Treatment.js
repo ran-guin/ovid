@@ -15,9 +15,17 @@ module.exports = {
   		model: 'appointment',
   	},
 
+        patient : {
+            model : 'patient'
+        }, 
+
   	vaccine: {
   		model: 'vaccine',
   	},
+
+        vaccinator: {
+            model : 'staff'
+        },
  
  	route: {
  		type: 'string',
@@ -32,8 +40,12 @@ module.exports = {
  	notes: {
  		type: 'string',
  	},
+  	
+        applied : {
+            type : 'date'
+        },
 
-  	expiry: {
+        expiry: {
   		type: 'date'
   	},
 
@@ -52,7 +64,7 @@ module.exports = {
         
         status : {
             type: 'string',
-            enum: ['Scheduled', 'Scanned', 'Declined', 'Applied']
+            enum: ['Unknown', 'Inactive', 'Active', 'Expired']
         }
   }
 };

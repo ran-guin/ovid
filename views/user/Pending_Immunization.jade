@@ -1,0 +1,69 @@
+table.table(ng-init="loadTravel();")
+  tr
+    td &nbsp;
+    td(colspan=2)
+      h4 Current Vulnerability: 
+    td(colspan=2) [ Region = {{ patient.region }} ]
+  tr.active
+    th Disease
+    th Vaccine
+    th Recommendation
+    th Status
+    th Load
+
+  tr.danger(ng-repeat="need in schedule")
+      td {{ need.disease.name }}
+      td 
+        span(ng-if="need.vaccine.name == undefined")
+          span choose one...
+        span(ng-if="need.vaccine.name ")
+          span {{ need.vaccine.name }}
+      td {{ need.recommendation }}
+      td &nbsp;
+      td
+        a.btn.btn-primary.btn-xs(
+          tabindex="0"
+          data-trigger='focus'
+          data-toggle='popover'
+          data-html="true"
+          data-placement='left' 
+          ng-click="loadScheduledVaccinations(need.disease)" 
+          title="Load Scheduled Vaccinations" 
+          data-content="This would dynamically load suggested vaccinations by retrieving via API all pending suggested vaccinations based on:<UL><LI>vaccination history</LI><LI>patient age</LI><LI>location</LI><LI>scheduled travel itinerary</LI></UL><P><B>Vaccines added below for Example Only</B></P>"
+          ) 
+          i.fa.fa-question-circle
+  tr
+    td &nbsp;
+    td(colspan=2) 
+      h4 Travel Requirements: 
+       a.btn.btn-success.btn-xs(ng-click="addTravel()" onclick="alert('Add modal to Manage travel plans')") +
+  tr.active
+    th Region
+    th Disease
+    th Recommendation
+    th Status
+    th Load
+  tr.warning(ng-repeat="itin in travel")
+    td 
+      b {{itin.region}}
+    td {{itin.start}}
+    td {{itin.finish}}
+    td 
+      button.btn.btn-danger.btn-xs(ng-click="deleteTravel($index)") x
+    td
+      a.btn.btn-primary.btn-xs(
+        tabindex="0"
+        data-trigger='focus'
+        data-toggle='popover'
+        data-html="true"
+        data-placement='left' 
+        ng-click="loadScheduledVaccinations(need.disease)" 
+        title="Load Scheduled Vaccinations" 
+        data-content="This would dynamically load suggested vaccinations by retrieving via API all pending suggested vaccinations based on:<UL><LI>vaccination history</LI><LI>patient age</LI><LI>location</LI><LI>scheduled travel itinerary</LI></UL><P><B>Vaccines added below for Example Only</B></P>"
+        ) 
+        i.fa.fa-question-circle
+  tr
+    td &nbsp;
+    td(colspan=2)
+
+    td &nbsp;

@@ -78,7 +78,8 @@ module.exports = {
 
     diseases: {
       collection: 'disease',
-      via: 'vaccines'
+      via: 'vaccines',
+      through: 'protection',
     },
 
     // Side effects & ContraIndications in separate table ? (or local if using noSQL)

@@ -145,9 +145,16 @@ module.exports = {
 
     return Clinic_staff.find({ clinic : clinic_id }).populate('staff')
     .then ( function ( staffData ) {  
-        console.log("checking for staff..."); 
+        if (staffData) {
+          console.log("staff Data: " + JSON.stringify(staffData));
+          return staffData;
+        }
+        else {
+          console.log('no staff assigned to clinic');
+          return [];
+        }
 
-        return Record.join_data({ join : staffData, to : 'staff'});
+        // return Record.join_data({ join : staffData, to : 'staff'});
     })
     .catch ( function (err) {
       console.log("Errors: " + err);
@@ -157,11 +164,9 @@ module.exports = {
 
 
   getAppointments: function (clinic_id) {
-    console.log("load Appointments for clinic " + clinic_id);
     
     return Appointment.find({ clinic : clinic_id }).populate('vaccinator').populate('patient')
     .then ( function ( appointmentData ) {  
-        console.log("checking for appointments...");        
 
         if (appointmentData) {
           console.log("Appointment Data: " + JSON.stringify(appointmentData));

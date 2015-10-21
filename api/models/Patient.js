@@ -32,7 +32,11 @@ module.exports = {
     	enum: ['M','F']
     },
 
-    region_id: {
+    user : {
+      model : 'user',
+    },
+    
+    region: {
         model: 'region',
     },
 
@@ -54,6 +58,12 @@ module.exports = {
     identifierType: {
     	type: 'string',
     	enum: ['BC Care Card #', 'OHIP #']
+    },
+
+    status: {
+      type: 'string',
+      enum: ['Active', 'Inactive', 'Demo'],
+      defaultsTo: 'Active'
     }
   },
 
