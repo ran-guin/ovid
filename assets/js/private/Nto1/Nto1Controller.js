@@ -60,6 +60,8 @@ app.controller('Nto1Controller',
 
     $scope.config = {};
 
+    $scope.saved = {};
+
     $scope.reloadConfig = function (config) {
         if ($scope.config) {
             $scope.url = $scope.config['url'] ;
@@ -311,8 +313,7 @@ app.controller('Nto1Controller',
         // Use post to prevent parameters length limitations in GET
         return $http.post(urlRequest, jsonData)
         .success ( function (response) {
-            console.log("Loaded Data");
-            console.log(JSON.stringify(response) ); 
+            console.log('Loaded: ' + JSON.stringify(response) ); 
             recordData = response; 
             
             $scope.reloadConfig();
@@ -365,6 +366,38 @@ app.controller('Nto1Controller',
         });
 
     }   
+
+    /********** Save Item **********/
+    $scope.saveItem = function (index, model) {
+
+        var keys = Object.keys($scope.items[index]);
+        var data = {};
+
+        for (var j=0; j<keys.length; j++) {
+            var key = keys[j];
+            console.log(index + " KEY: " + key + " = " + typeof $scope.items[index][key])
+            if ( $scope.items[index][key] && typeof $scope.items[index][key] != 'object' ) {
+                console.log("SET " + key);
+                data[key] = $scope.items[index][key];
+            }
+            else if ($scope.items[index][key] && $scope.items[index][key][key + '_id']) {
+                data[key] = $scope.items[index][key][key + '_id'];
+            }
+            else if ($scope.items[index][key] && $scope.items[index][key]['id']) {
+                data[key] = $scope.items[index][key]['id'];
+            }
+        }       
+
+
+        var JSONdata = JSON.stringify(data);
+        console.log(i + " SaveData: " + JSONdata);
+
+        // update database ... 
+        return $http.post("/" + model, JSONdata)
+        .then ( function (res) {
+            $scope.items[index]['DBstatus'] = 'saved';
+        }); 
+    }
 
     /********** Delete Item **********/
     $scope.deleteItem = function ( index ) {
