@@ -159,7 +159,10 @@ module.exports = {
   getAppointments: function (clinic_id) {
     console.log("load Appointments for clinic " + clinic_id);
     
-    return Appointment.find({ clinic : clinic_id }).populate('vaccinator').populate('patient')
+    return Appointment.find({ clinic : clinic_id })
+    .sort('position ASC')
+    .populate('vaccinator')
+    .populate('patient')
     .then ( function ( appointmentData ) {  
         console.log("checking for appointments...");        
 
