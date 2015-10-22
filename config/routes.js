@@ -87,7 +87,6 @@ module.exports.routes = {
   ***************************************************************************/
 
   'GET /clinic/home/:id' : 'ClinicController.home',
-  'GET /clinic/load': 'ClinicController.load',
   'GET /clinic/list': 'ClinicController.list',
   'GET /clinic/edit': 'ClinicController.edit',
   'GET /clinic/add' : 'ClinicController.new',
