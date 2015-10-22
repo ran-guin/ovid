@@ -25,8 +25,8 @@ app.controller('ClinicController',
         }
         if ($scope.items) {
             for (var i=0; i < $scope.items.length; i++) {
-                if ($scope.$parent.items[i].Arrival_Time) {
-                    $scope.$parent.items[i].Wait_Time = Nto1Factory.timediff($scope.items[i].Arrival_Time, $scope.now);
+                if ($scope.$parent.items[i].arrivalTime) {
+                    $scope.$parent.items[i].Wait_Time = Nto1Factory.timediff($scope.items[i].arrivalTime, $scope.now);
                 }
             }
         }
@@ -67,8 +67,8 @@ app.controller('ClinicController',
             { field : 'patient.id', label: 'patient_id', set: 1, mandatory : 1, hidden:1},
             { field : 'lastName'},
             { field : 'firstName'},
-            { field : 'identifier'},
-            { field : 'identifierType'},
+            { field : 'identifier', set: 1},
+            { field : 'identifierType', set: 1},
             { field : 'gender'},
             { field : 'birthdate', type: 'date'},
             { field : 'appointment.status', hidden: 1},
@@ -137,39 +137,6 @@ app.controller('ClinicController',
         $scope.setup(config);
         $scope.$parent.initialize(config);
 
-        console.log("Clinic init HASH: ");
-        
-        $scope.dumpHash(config);
-
-        if (config && config['User']) { 
-            console.log("loaded user attributes");
-            $scope.$parent.user = config['User'];
-            console.log(JSON.stringify($scope.user));
-        }
-        if (config && config['clinic']) { 
-            console.log("loaded clinic attributes in clinic controller");
-            $scope.$parent.clinic = config['clinic'];
-            console.log(JSON.stringify($scope.clinic));
-            console.log("loaded clinic parent attributes :");
-            console.log(JSON.stringify($scope.$parent.clinic));
-        }
-        if (config && config['patient']) { 
-            console.log("loaded patient attributes");
-            $scope.$parent.patient = config['patient'];
-        } 
-        if (config && config['clinic'] && config['clinic']['appointments']) {
-            $scope.$parent.items = config['clinic']['appointments'];
-            console.log("Start with " + $scope.items.length);
-            console.log("loaded " + $scope.items.length + " clinic appointments");
-        }
-
-        if (config && config['clinic'] && config['clinic']['staff']) {
-            $scope.$parent.staff = config['clinic']['staff'];
-            console.log("Start with " + $scope.items.length);
-            console.log("loaded " + $scope.items.length + " clinic appointments");
-        }      
-
-
         $scope.$parent.highlightBackground = "background-color:#9C9;";
         var highlight_element = document.getElementById('clinicTab');
         if (highlight_element) {
@@ -188,7 +155,7 @@ app.controller('ClinicController',
             }
         }
             
-        console.log("still have " + $scope.items.length + " clinic appointments");
+        console.log("still have " + $scope.clinic.appointments.length + " clinic appointments");
 
         $scope.ac_options = JSON.stringify($scope.Autocomplete);
 
@@ -198,49 +165,42 @@ app.controller('ClinicController',
 
   /********** Add Item to List of Requests **********/
     $scope.addItem = function( ) {
-        console.log("N# " + $scope.items.length);
-        Nto1Factory.addItem( $scope.itemColumns, $scope.items );
-        console.log("N2# " + $scope.items.length);
+        Nto1Factory.addItem( $scope.itemColumns, $scope.items, 'patient');
         
         var index = $scope.items.length - 1;
         console.log('added patient to queue ' + index);
 
-        $scope.$parent.items[index].status = 'Queued';
-        $scope.$parent.items[index].Arrival_Time = $scope.now;
-        $scope.$parent.items[index].staff = $scope.user.id;
-        $scope.$parent.items[index].clinic = $scope.clinic.id;
+        $scope.items[index].status = 'Queued';
+        $scope.items[index].arrivalTime = $scope.now;
+        $scope.items[index].staff = $scope.user.id;
+        $scope.items[index].clinic = $scope.clinic.id;
 
-        $scope.$parent.items[index].position = $scope.items.length;
-
-        $scope.$parent.clinic.appointments[index] = $scope.items[index];
-//        $scope.clinic.appointments.push($scope.items[index]);  // add to clinic appointments which mirrors items... 
-
-        var data = JSON.stringify($scope.items[index]);
-
-        console.log("Data: " + data );
-
-        // update database ... 
-        $http.post("/appointment", data)
-        .then ( function (res) {
-            console.log("Added queued patient");
-            console.log(JSON.stringify(res));
-            console.log("N3# " + $scope.items.length);
-
+        $scope.items[index].position = $scope.items.length;
+    
+        // $scope.items.push(add);        
+     
+        return $scope.saveItem(index, 'appointment')
+        .then ( function () {
+            // add to clinic appointments which mirrors items... 
+            $scope.$parent.clinic.appointments = $scope.items;  
         });
+
     }
 
     $scope.deleteItem = function (index) {
+        
+        $scope.items = $scope.clinic.appointments;
+
         var deleted = $scope.items[index]['position'];
 
-        $scope.$parent.deleteItem(index);
-
-        for (var i=0; i< $scope.items.length; i++) {
-            if ($scope.items[index]['position'] > deleted ) {
-                $scope.$parent.items[index]['position']--;
+        $q.when ( $scope.$parent.deleteItem(index) )
+        .then (function (res) {
+            for (var i=0; i< $scope.items.length; i++) {
+                if ($scope.items[index]['position'] > deleted ) {
+                    $scope.$parent.items[index]['position']--;
+                }
             }
-        }
-        // update database ... 
-
+        });
     }
 
     $scope.loadRecord = function (recordId) {
@@ -270,7 +230,6 @@ app.controller('ClinicController',
         });
 
     }
-
 
     $scope.saveChanges = function (status) {
         var data = {
