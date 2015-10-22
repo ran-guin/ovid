@@ -100,14 +100,13 @@ module.exports = {
         
         returnData.page = page;
 
-
-        Appointment.findOne( { id : appointment_id }  )
+        Appointment.findOne( { id : appointment_id })
         .populate('clinic')
         .populate('patient')
         .populate('vaccinator')
         .then ( function (appointmentData) {         
 
-        	console.log("AD: " + JSON.stringify(appointmentData));
+        	console.log("***** AD *******  : " + JSON.stringify(appointmentData));
         	var patient_id = appointmentData.patient.id;
 
         	returnData.appointment = appointmentData;
