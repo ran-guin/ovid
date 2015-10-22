@@ -44,43 +44,17 @@ app.controller('CommonController',
 	            $scope.$parent.schedule  = config['schedule'];
 	            console.log('load schedule: ' + JSON.stringify($scope.schedule));
 	        }
-	        if (config && config['schedule']) {
-	            $scope.$parent.schedule  = config['schedule'];
-	            console.log('load schedule: ' + JSON.stringify($scope.schedule));
-	        }
-	 
 	 
 	        if (config && config['clinic'] && config['clinic']['appointments']) {
-	            console.log("Start with " + $scope.items.length);
+	            console.log("Start with " + $scope.clinic.appointments.length);
 	            $scope.$parent.items = config['clinic']['appointments'];
-	            console.log("loaded " + $scope.items.length + " clinic appointments");
+	            console.log("loaded " + $scope.clinic.appointments.length + " clinic appointments");
 	        }    
 	 
-	        $scope.$parent.highlightBackground = "background-color:#9C9;";
-	        var highlight_element = document.getElementById('clinicTab');
-	        if (highlight_element) {
-	            highlight_element.style=($scope.highlightBackground)
-	        }
-
 	        $scope.setup(config);
 
 	        $scope.$parent.initialize(config);
 
-	        if ($scope.recordId) { $scope.loadRecord($scope.recordId) }
-	        else {
-	            console.log("Initialize " + $scope.statusField + '=' + $scope.statusDefault);
-	            if ($scope.statusField ) {
-	                if ($scope[$scope.statusField] === undefined) {
-	                    $scope.$parent[$scope.statusField] = $scope.statusDefault;
-	                    console.log('set default status to' + $scope.recordStatus);
-	                }
-	                Nto1Factory.setClasses($scope.statusOptions, $scope[$scope.statusField]);  
-	            }
-	        }
-
-	        $scope.$parent.ac_options = JSON.stringify($scope.Autocomplete);
-
-	        $scope.$parent.manualSet = []; /* 'Request_Notes'];  /* manually reset */
 	    }
 
     }
