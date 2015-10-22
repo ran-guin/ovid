@@ -80,7 +80,7 @@ module.exports = {
                           return res.send('');
                         }
 
-                        console.log("loaded data...");
+                        console.log("loaded clinic data..." + JSON.stringify(clinicData));
 
                         var page = { 
                             item_Class : 'patient',
