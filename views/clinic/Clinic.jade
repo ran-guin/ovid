@@ -11,200 +11,206 @@ block content
       - var init = "initialize(" + JSON.stringify(config) + ")";
 
       div(ng-controller="Nto1Controller")
-       div(ng-controller="ClinicController" ng-init="#{init}" ngcloak)
+        div(ng-controller="CommonController")
+          div(ng-controller="ClinicController" ng-init="#{init}" ngcloak)
 
-        div#topMessage
+            div#topMessage
 
-        form#Queue(ng-submit="queue()")
-          table.table(width='100%')
-            tr
-              td.col-md-4
-                table
-                  tr
-                    td(colspan=2) 
-                      b {{ timestamp }}
-                  tr
+            form#Queue(ng-submit="queue()")
+              table.table(width='100%')
+                tr
+                  td.col-md-4
+                    table
+                      tr
+                        td(colspan=2) 
+                          b {{ timestamp }}
+                      tr
+                        td 
+                          b(data-toggle="tooltip" title="Currently logged in user") Logged in: {{ user.name }}
+                      tr
+                        td 
+                          hr            
+                      tr
+                        td 
+                          u Clinic: &nbsp;
+                      tr 
+                        td
+                          b {{ clinic.name }} [ {{ clinic.id }} ]
+                      tr
+                        td {{ clinic.address }}
+
+                  td.col-md-4(align='right')
+                    div(ng-if="clinic.staff.length")
+                      table.table
+                        tr
+                          td 
+                            b Current Staff: &nbsp; 
+                            button.btn.btn-warning.btn-xs(type='button' data-toggle='modal' data-target='#manageStaffModal') Manage
+                        tr.active
+                          th Name
+                          th Role
+                          th Status
+                          // th Edit
+                          //div(ng-repeat='emp in clinic.staff')
+                            - var dutyClass = "active.active-success";
+
+                        // 
+                          tr.active(ng-if="Vstaff.dutyStatus != 'On Duty'" ng-repeat='Vstaff in clinic.staff')
+                            td {{ Vstaff.alias}}
+                            td {{ Vstaff.role}}
+                            td {{ Vstaff.dutyStatus }} &nbsp;
+                            td
+                                button.btn.btn-success.btn-xs(type='button' ng-click="changeDuty($index,'On Duty')") Place On Duty
+
+                        tr.success(ng-if="Vstaff.dutyStatus == 'On Duty'" ng-repeat='Vstaff in clinic.staff')
+                            td 
+                              b {{ Vstaff.alias}}
+                            td 
+                              b {{ Vstaff.role}}
+                            td 
+                              b {{ Vstaff.dutyStatus }} &nbsp;
+                            // 
+                              td
+                                button.btn.btn-danger.btn-xs(type='button' ng-click="changeDuty($index,'Off Duty')") Take Off duty
+
+                    div(ng-if="! clinic.staff.length")
+                      button.btn.btn-warning.btn-xs(type='button' data-toggle='modal' data-target='#manageStaffModal') Manage Clinic Staff
+                      div 
+                        b &nbsp; ( {{clinic.staff.length}} staff currently assigned to this clinic)
+
+              hr
+              h3 Queue: [ {{ clinic.appointments.length }} ] {{ token }}
+
+              h5 Items:
+              h6 {{ JSON.stringify(items) }}
+
+              div(ng-if="clinic.appointments.length")
+                table.table.table-bordered
+                  tr.active
+                    td &nbsp;
                     td 
-                      b(data-toggle="tooltip" title="Currently logged in user") Logged in: {{ user.name }}
-                  tr
+                      b Position
                     td 
-                      hr            
-                  tr
+                      b Last Name
                     td 
-                      u Clinic: &nbsp;
-                  tr 
+                      b First Name
+                    td 
+                      b Birthdate
                     td
-                      b {{ clinic.name }} [ {{ clinic.id }} ]
-                  tr
-                    td {{ clinic.address }}
+                      b ID #
+                    td 
+                      b Vaccinator
+                    td 
+                      b Wait Time
+                    td 
+                      b Room          
+                    td 
+                      b Session          
+                    td 
+                      b Status
+                  tr(ng-repeat="q in clinic.appointments")
+                    td
+                      button.btn.btn-danger.btn-xs(type='button' value="Delete" ng-click="deleteItem($index)") X
+                      span &nbsp;
+                      button.btn.btn-warning.btn-xs(type='button' data-toggle='modal' data-target='#editItemModal') Edit
+                      span(ng-if="q.DBstatus == 'saved'") 
+                        span &nbsp;
+                        i.fa.fa-check-circle-o.fa-lg
+                    td         
+                      span {{ q.position }} 
+                    td {{ q.patient.lastName }} 
+                    td {{ q.patient.firstName }}
+                    td {{ q.patient.birthdate }} 
+                    td {{ q.patient.identifier_type }} : {{ q.patient.identifer }}
+                    td 
+                      table(width='100%')
+                        tr
+                          td
+                            span(ng-if="q.vaccinator")
+                              b {{ q.vaccinator.alias }}
+                            span(ng-if="!q.vaccinator")
+                              button.btn.btn-warning.btn-xs(type='button' data-toggle='modal' ng-click="checkAssignments(q.id);" data-target='#assignStaffModal') Assign
+                          td(align='right')
+                            span(ng-if="2") 
+                              // if user has access to treatment 
+                              a.btn.btn-primary.btn-xs(href="/appointment/home/{{q.id}}") Treat
 
-              td.col-md-4(align='right')
-                div(ng-if="clinic.staff.length")
-                  table.table
-                    tr
-                      td 
-                        b Current Staff: &nbsp; 
-                        button.btn.btn-warning.btn-xs(type='button' data-toggle='modal' data-target='#manageStaffModal') Manage
-                    tr.active
-                      th Name
-                      th Role
-                      th Status
-                      th Edit
-                      //div(ng-repeat='emp in clinic.staff')
-                        - var dutyClass = "active.active-success";
+                    td {{ q.Wait_Time }}
+                    td {{ q.Site_Name }}
+                    td {{ q.treatment_id }}
+                    td {{ q.status }}
+              div(ng-if="! items.length")
+                b (Nothing currently in the queue)
 
-                    tr.active(ng-if="Vstaff.dutyStatus != 'On Duty'" ng-repeat='Vstaff in clinic.staff')
-                        td {{ Vstaff.alias}}
-                        td {{ Vstaff.role}}
-                        td {{ Vstaff.dutyStatus }} &nbsp;
-                        td
-                            button.btn.btn-success.btn-xs(type='button' ng-click="changeDuty($index,'On Duty')") Place On Duty
+            include ./../Nto1/smartSearch.jade
 
-                    tr.success(ng-if="Vstaff.dutyStatus == 'On Duty'" ng-repeat='Vstaff in clinic.staff')
-                        td 
-                          b {{ Vstaff.alias}}
-                        td 
-                          b {{ Vstaff.role}}
-                        td 
-                          b {{ Vstaff.dutyStatus }} &nbsp;
-                        td
-                          button.btn.btn-danger.btn-xs(type='button' ng-click="changeDuty($index,'Off Duty')") Take Off duty
-   
-                div(ng-if="! clinic.staff.length")
-                  button.btn.btn-warning.btn-xs(type='button' data-toggle='modal' data-target='#manageStaffModal') Manage Clinic Staff
-                  div 
-                    b &nbsp; ( {{clinic.staff.length}} staff currently assigned to this clinic)
+            div#message
+            if (!id) 
+             div.modal.fade#newPatientModal
+              div.modal-dialog
+                div.modal-content
+                  div.modal-header
+                    button.close(type="button" class="close" data-dismiss="modal" aria-label="Close")
+                      span(aria-hidden="true") &times;
+                    h4.modal-title Add New Patient
+                  div.modal-body
+                    include newPatient.jade
+                    hr
+                    div#insideModal
+                  div.modal-footer
+                    button.btn.btn-default(type="button button-danger" data-dismiss="modal") Close
 
-          hr
-          h3 Queue: [ {{items.length}} = {{ clinic.appointments.length }}]
+             div.modal.fade#manageStaffModal
+              div.modal-dialog
+                div.modal-content
+                  div.modal-header
+                    button.close(type="button" class="close" data-dismiss="modal" aria-label="Close")
+                      span(aria-hidden="true") &times;
+                    h4.modal-title Manage Current Staff
+                  div.modal-body
+                    include manageStaff.jade
+                    hr
+                    div#insideModal
+                  div.modal-footer
+                    button.btn.btn-default(type="button button-danger" data-dismiss="modal") Close
 
-          h5 Items:
-          h6 {{ JSON.stringify(items) }}
+            div.modal.fade#assignStaffModal
+              div.modal-dialog
+                div.modal-content
+                  div.modal-header
+                    button.close(type="button" class="close" data-dismiss="modal" aria-label="Close")
+                      span(aria-hidden="true") &times;
+                    h4.modal-title Assign Current Staff to Patient(s)
+                  div.modal-body
+                    include assignStaff.jade
+                    hr
+                    div#insideModal
+                  div.modal-footer
+                    button.btn.btn-default(type="button button-danger" data-dismiss="modal") Close
 
-          div(ng-if="items.length")
-            table.table.table-bordered
-              tr.active
-                td &nbsp;
-                td 
-                  b Position
-                td 
-                  b Last Name
-                td 
-                  b First Name
-                td 
-                  b Birthdate
-                td
-                  b ID #
-                td 
-                  b Vaccinator
-                td 
-                  b Wait Time
-                td 
-                  b Room          
-                td 
-                  b Session          
-                td 
-                  b Status
-              tr(ng-repeat="q in clinic.appointments")
-                td
-                  button.btn.btn-danger.btn-xs(type='button' value="Delete" ng-click="deleteItem($index)") X
-                  span &nbsp;
-                  button.btn.btn-warning.btn-xs(type='button' data-toggle='modal' data-target='#editItemModal') Edit
-                td         
-                  span {{ q.position }} 
-                td {{ q.patient.lastName }} 
-                td {{ q.patient.firstName }}
-                td {{ q.patient.birthdate }} 
-                td {{ q.patient.identifier_type }} {{ q.patient.identiferType }}
-                td 
-                  table(width='100%')
-                    tr
-                      td
-                        span(ng-if="q.vaccinator")
-                          b {{ q.vaccinator.alias }}
-                        span(ng-if="!q.vaccinator")
-                          button.btn.btn-warning.btn-xs(type='button' data-toggle='modal' ng-click="checkAssignments(q.id);" data-target='#assignStaffModal') Assign
-                      td(align='right')
-                        span(ng-if="2") 
-                          // if user has access to treatment 
-                          a.btn.btn-primary.btn-xs(href="/appointment/home/{{q.id}}") Treat
+            if debugMode
+              hr(style='border-width:thick; border-color:black;')
+              .container(style='width:90%')
+                h3 Development Feedback (used for Debugging purposes only) :
 
-                td {{ q.Wait_Time }}
-                td {{ q.Site_Name }}
-                td {{ q.treatment_id }}
-                td {{ q.status }}
-          div(ng-if="! items.length")
-            b (Nothing currently in the queue)
-        
-        include ./../Nto1/smartSearch.jade
-
-        div#message
-        if (!id) 
-         div.modal.fade#newPatientModal
-          div.modal-dialog
-            div.modal-content
-              div.modal-header
-                button.close(type="button" class="close" data-dismiss="modal" aria-label="Close")
-                  span(aria-hidden="true") &times;
-                h4.modal-title Add New Patient
-              div.modal-body
-                include newPatient.jade
-                hr
-                div#insideModal
-              div.modal-footer
-                button.btn.btn-default(type="button button-danger" data-dismiss="modal") Close
-
-         div.modal.fade#manageStaffModal
-          div.modal-dialog
-            div.modal-content
-              div.modal-header
-                button.close(type="button" class="close" data-dismiss="modal" aria-label="Close")
-                  span(aria-hidden="true") &times;
-                h4.modal-title Manage Current Staff
-              div.modal-body
-                include manageStaff.jade
-                hr
-                div#insideModal
-              div.modal-footer
-                button.btn.btn-default(type="button button-danger" data-dismiss="modal") Close
-
-        div.modal.fade#assignStaffModal
-          div.modal-dialog
-            div.modal-content
-              div.modal-header
-                button.close(type="button" class="close" data-dismiss="modal" aria-label="Close")
-                  span(aria-hidden="true") &times;
-                h4.modal-title Assign Current Staff to Patient(s)
-              div.modal-body
-                include assignStaff.jade
-                hr
-                div#insideModal
-              div.modal-footer
-                button.btn.btn-default(type="button button-danger" data-dismiss="modal") Close
-
-        if debugMode
-          hr(style='border-width:thick; border-color:black;')
-          .container(style='width:90%')
-            h3 Development Feedback (used for Debugging purposes only) :
-
-            if User
-              div.alert.alert-warning User: #{JSON.stringify(User)}
-            //- if clinic
-            //-   div.alert.alert-danger Clinic: #{JSON.stringify(clinic)}
-            if patient
-              div.alert.alert-danger Patient: #{JSON.stringify(patient)}
-            if treatment
-              div.alert.alert-danger Treatment: #{JSON.stringify(treatment)}
-            if Config 
-              div.alert.alert-danger Config: #{JSON.stringify(Config)}
-            if clinic && clinic.staff
-              div.alert.alert-danger Clinic Staff: 
-                ul
-                  li(ng-repeat = "staff in clinic.staff")
-                    b {{ staff }}
-            if clinic && clinic.appointments
-              div.alert.alert-danger Clinic Appointments: 
-                ul
-                  li(ng-repeat = "appointment in clinic.appointments")
-                    b {{appointment}}
+                if User
+                  div.alert.alert-warning User: #{JSON.stringify(User)}
+                //- if clinic
+                //-   div.alert.alert-danger Clinic: #{JSON.stringify(clinic)}
+                if patient
+                  div.alert.alert-danger Patient: #{JSON.stringify(patient)}
+                if treatment
+                  div.alert.alert-danger Treatment: #{JSON.stringify(treatment)}
+                if Config 
+                  div.alert.alert-danger Config: #{JSON.stringify(Config)}
+                if clinic && clinic.staff
+                  div.alert.alert-danger Clinic Staff: 
+                    ul
+                      li(ng-repeat = "staff in clinic.staff")
+                        b {{ staff }}
+                if clinic && clinic.appointments
+                  div.alert.alert-danger Clinic Appointments: 
+                    ul
+                      li(ng-repeat = "appointment in clinic.appointments")
+                        b {{appointment}}
 
