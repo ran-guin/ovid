@@ -9,39 +9,43 @@ module.exports = {
 
 	home: function (req, res) {
 		var id = req.param('id') || 0;
-		console.log('clinic home');
+		console.log('clinic home controller');
 
- 
+
         if (!req.session.param) { req.session.param = {} }
+		var Params = req.payload || req.session.params;
 
-	    if (req.session && req.session.params) {
-	      var page = req.session.params.defaultPage || 'homepage';
+	    if (Params) {
+	      var page = Params.defaultPage || 'homepage';
 
-	      req.session.params['page'] = {};
-	      req.session.params['page']['item_Class'] = 'patient';
-	      req.session.params['page']['search_title'] = "Search for Patients using any of fields below";
-	      req.session.params['page']['add_to_scope'] = true;
+	      Params['page'] = {};
+	      Params['page']['item_Class'] = 'patient';
+	      Params['page']['search_title'] = "Search for Patients using any of fields below";
+	      Params['page']['add_to_scope'] = true;
 
 	      Clinic.load( {'clinic_id' : id, include : { staff: true, appointments : true} }, function (err, result) {	        
-	        if (err) {  return res.negotiate(err) }
+	        if (err) {  
+	        	console.log('load error: ' + err);
+	        	return res.negotiate(err)
+	        }
 
 	        if (!result) {
 	          console.log('no results');
 	          return res.send('');
 	        }
-
+	        console.log('render clinic');
             var page = { 
                 item_Class : 'patient',
                 search_title : "Search for Patients using any of fields below",
                 add_to_scope : true
             };
 
-            req.session.param['page'] = page;    
-	    	req.session.params['clinic'] = result;
+            Params['page'] = page;    
+	    	Params['clinic'] = result;
                
-            console.log("CLINIC PARAMS: " + JSON.stringify(req.session.params));
+            console.log("CLINIC PARAMS: " + JSON.stringify(Params));
 
-	        res.render('clinic/Clinic', req.session.params);
+	        res.render('clinic/Clinic', { config : Params });
 	      });
 	    }
 	    else {
