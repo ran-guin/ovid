@@ -56,6 +56,7 @@ process.chdir(__dirname);
     }
   }
 
+    app.locals.moment = require('moment');
 
   // Start server
   sails.lift(rc('sails'));
