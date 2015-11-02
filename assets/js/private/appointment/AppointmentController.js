@@ -7,8 +7,18 @@ app.controller('AppointmentController',
     function appointmentController ($scope, $http, $q, Nto1Factory) {
 
     console.log('loaded appointment controller');        
+    $scope.context = 'Appointment';
 
     $scope.debugMode = false;
+
+    $scope.testMessage = {
+       text: 'hello world!',
+       time: new Date()
+    };
+    
+    var start = moment([2007, 0, 5]);
+    var end   = moment([2007, 0, 10]);
+    $scope.tester = end.to(start);       // "5 days ago"
 
     /** run PRIOR to standard initialization  */
     $scope.setup = function (config) {
@@ -160,7 +170,7 @@ app.controller('AppointmentController',
 
         var ids = $scope.loadExamples(['Scanned','Scanned'],[null,null], ['Recommended','Mandatory for Region'],1);
 
-        for (i=0; i<ids.length; i++) {
+        for (var i=0; i<ids.length; i++) {
             $scope.$parent.items[i].status = 'Scanned';
 
             var data = {
@@ -270,7 +280,10 @@ app.controller('AppointmentController',
             $scope.$parent.items.push(vaccine);
             
             console.log("Post to database (treatment): " + JSON.stringify(data));
-            $http.post("/treatment", JSON.stringify(data))
+            
+            var config = { headers : { 'token' : $scope.token }};
+
+            $http.post("/treatment", JSON.stringify(data), config)
             .then ( function (response) {
                 console.log("added to database");
                 var index = $scope.items.length - 1;

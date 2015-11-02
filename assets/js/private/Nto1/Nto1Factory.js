@@ -4,6 +4,7 @@ app.factory('Nto1Factory', function($rootScope, $http){
   var service = {};
 
   service.items = [];
+  service.include = {};
   service.pendingChanges = [];
   service.Columns = [];
 
@@ -66,139 +67,140 @@ app.factory('Nto1Factory', function($rootScope, $http){
 
     this.attributes = ['user', 'userid', 'url'];
     console.log('Extend ' + Columns.length + ' Column Details');
-      for ( var i=0; i < Columns.length; i++) {
-          var col = Columns[i];
-          var field = col['field'];
-          var label = col['label'] || field;
-          var type  = col['type'] || 'string';
-          var set = col['set'];
-          var target = col['target'] || field;
+    for ( var i=0; i < Columns.length; i++) {
+        var col = Columns[i];
+        var field = col['field'];
+        var label = col['label'] || field;
+        var type  = col['type'] || 'string';
+        var set = col['set'];
+        var target = col['target'] || field;
 
-          this.attributes.push(label);
-          this.Map[label] = field;
-          this.Type[label] = type;
-          if (set) { this.Set[label] = target }
+        this.attributes.push(label);
+        this.Map[label] = field;
+        this.Type[label] = type;
+        if (set) { this.Set[label] = target }
 
-          if (label) { this.Fields.push(field + ' AS ' + label) }
-          else { this.Fields.push(field) }
-      }
-
-          console.log('Extend ' + itemColumns.length + ' Item Details');
-          for ( var i=0; i < itemColumns.length; i++) {
-          var col = itemColumns[i];
-          var field = col['field'];
-          var label = col['label'] || field;
-          var type  = col['type'] || 'string';
-          var set = col['set'];
-          var target = col['target'] || field;
-          var search = col['search'];
-
-          var model = label; // .replace(/[_ ]/,'');
-          var mandatory = col['mandatory'] || 0;
-          var hidden = col['hidden'] || 0;
-          var id = col['id'] || field;
-          var autocomplete_on = 1;
-
-          var attributes = { id : id, type : 'text', placeholder : '-- ? --'};
-
-          if (label) { this.itemFields.push(field + ' AS ' + label) }
-          else { this.itemFields.push(field) }
-          
-          if (mandatory) 
-            attributes['mandatory'] = 1;
-          if (model)
-            attributes['ng-model'] = model;
-          if (autocomplete_on) {
-            attributes['data-autocomplete'] = "field:" + field + ";";
-            if (type)
-              attributes['data-autocomplete'] += "type:" + type + ';'; 
-          }
-
-          // console.log('autocomplete options: ' + attributes['data-autocomplete']);
-
-          itemColumns[i]['id'] = label || id;
-          itemColumns[i]['placeholder'] = '-- ? --';
-          itemColumns[i]['autocomplete'] = attributes['data-autocomplete']
-          itemColumns[i]['att'] = attributes;
-          if (label && model) {
-              var param = '';
-              for (var key in attributes) {
-                  param += ' ' + key + "='" + attributes[key] + "'";
-              }
-              // this.itemColumns[i]['Xattributes'] = attributes;
-              itemColumns[i]['parameters'] = param;
-          }
-
-          // if (hidden) {
-          //     itemColumns[i]['parameters'] = "id = '" + id + "' type='text' placeholder='-- ? --' data-autocomplete= 'field: " + field;
-          //     this.Hidden.push(itemColumns[i]);
-          //     // console.log('Hide ' + id);
-          // }
-          // else {
-          //     itemColumns[i]['parameters'] = "id = '" + id + "' type='hidden'";
-          //     this.Shown.push(itemColumns[i]);
-          //     // console.log('Show ' + id);
-          // }
-
-          // if(autocomplete && autocomplete['search'].match('/' + label + '/')) {
-          if (autocomplete['search']) {
-            // console.log('add autocomplete options ' + autocomplete['search'] + ':' + label);
-          }
-
-          label_regex = new RegExp('\\b' + label + '\\b');
-          field_regex = new RegExp('\\b' + field + '\\b');
-
-          if (autocomplete && autocomplete['search']) {
-            if (autocomplete['search'].match(label_regex) || autocomplete['search'].match(field_regex)) {
-              this.SearchOn.push(itemColumns[i]);
-              console.log('search on ' + JSON.stringify(itemColumns[i]));
-            }
-          }
-
-          if (autocomplete && autocomplete['hide']) {
-            if (autocomplete['hide'].match(label_regex) || autocomplete['hide'].match(field_regex)) {
-              itemColumns[i]['parameters'] = "id = '" + id + "' type='text' placeholder='-- ? --' data-autocomplete= 'field: " + field;
-              this.Hidden.push(itemColumns[i]);
-            }
-          }
-
-          this.item_attributes.push(label);
-          
-          this.itemMap[label] = field;
-
-          if (col['set']) { this.itemSet[label] = target }
-          if (col['reset']) { this.itemReset[label] = field }
-      }
-
-      if (autocomplete) {
-        autocomplete['query'] = "SELECT DISTINCT " + autocomplete['query_field'];
-        autocomplete['query'] += " FROM " + autocomplete['query_table'];
-        autocomplete['query'] += " WHERE " + autocomplete['query_condition'];
-
-        autocomplete['displayBlock'] = 'message';
-        autocomplete['dataKey'] =  'data';
-
-        this.Autocomplete = autocomplete;
-      }
-
-      $rootScope.$broadcast('parametersExtended');
-
+        if (label) { this.Fields.push(field + ' AS ' + label) }
+        else { this.Fields.push(field) }
     }
 
-    /** Enable Highlighting at various stages **/
-    service.setClasses = function (keys, value) {
-        var default_class = '';
-        var highlightClass = 'form-group has-error text-warning';
-        this.highlightClass = highlightClass;
+    console.log('Extend ' + itemColumns.length + ' Item Details');
 
-        for (var i=0; i<keys.length; i++) { 
-          key = keys[i];
-          key = key.replace(/\s/g,'');
-          if (value == keys[i]) { this.highlight[key] = highlightClass }
-          else { this.highlight[key] = '' }
+    for ( var i=0; i < itemColumns.length; i++) {
+        var col = itemColumns[i];
+        var field = col['field'];
+        var label = col['label'] || field;
+        var type  = col['type'] || 'string';
+        var set = col['set'];
+        var target = col['target'] || field;
+        var search = col['search'];
+
+        var model = label; // .replace(/[_ ]/,'');
+        var mandatory = col['mandatory'] || 0;
+        var hidden = col['hidden'] || 0;
+        var id = col['id'] || field;
+        var autocomplete_on = 1;
+
+        var attributes = { id : id, type : 'text', placeholder : '-- ? --'};
+
+        if (label) { this.itemFields.push(field + ' AS ' + label) }
+        else { this.itemFields.push(field) }
+        
+        if (mandatory) 
+          attributes['mandatory'] = 1;
+        if (model)
+          attributes['ng-model'] = model;
+        if (autocomplete_on) {
+          attributes['data-autocomplete'] = "field:" + field + ";";
+          if (type)
+            attributes['data-autocomplete'] += "type:" + type + ';'; 
         }
-      $rootScope.$broadcast('setClasses');
+
+        // console.log('autocomplete options: ' + attributes['data-autocomplete']);
+
+        itemColumns[i]['id'] = label || id;
+        itemColumns[i]['placeholder'] = '-- ? --';
+        itemColumns[i]['autocomplete'] = attributes['data-autocomplete']
+        itemColumns[i]['att'] = attributes;
+        
+        if (label && model) {
+            var param = '';
+            for (var key in attributes) {
+                param += ' ' + key + "='" + attributes[key] + "'";
+            }
+            // this.itemColumns[i]['Xattributes'] = attributes;
+            itemColumns[i]['parameters'] = param;
+        }
+
+        // if (hidden) {
+        //     itemColumns[i]['parameters'] = "id = '" + id + "' type='text' placeholder='-- ? --' data-autocomplete= 'field: " + field;
+        //     this.Hidden.push(itemColumns[i]);
+        //     // console.log('Hide ' + id);
+        // }
+        // else {
+        //     itemColumns[i]['parameters'] = "id = '" + id + "' type='hidden'";
+        //     this.Shown.push(itemColumns[i]);
+        //     // console.log('Show ' + id);
+        // }
+
+        // if(autocomplete && autocomplete['search'].match('/' + label + '/')) {
+        if (autocomplete['search']) {
+          // console.log('add autocomplete options ' + autocomplete['search'] + ':' + label);
+        }
+
+        label_regex = new RegExp('\\b' + label + '\\b');
+        field_regex = new RegExp('\\b' + field + '\\b');
+
+        if (autocomplete && autocomplete['search']) {
+          if (autocomplete['search'].match(label_regex) || autocomplete['search'].match(field_regex)) {
+            this.SearchOn.push(itemColumns[i]);
+          }
+        }
+
+        if (autocomplete && autocomplete['hide']) {
+          if (autocomplete['hide'].match(label_regex) || autocomplete['hide'].match(field_regex)) {
+            itemColumns[i]['parameters'] = "id = '" + id + "' type='text' placeholder='-- ? --' data-autocomplete= 'field: " + field;
+            this.Hidden.push(itemColumns[i]);
+          }
+        }
+
+        this.item_attributes.push(label);
+        
+        this.itemMap[label] = field;
+
+        if (col['set']) { this.itemSet[label] = target }
+        if (col['reset']) { this.itemReset[label] = field }
     }
+
+    if (autocomplete) {
+      autocomplete['query'] = "SELECT DISTINCT " + autocomplete['query_field'];
+      autocomplete['query'] += " FROM " + autocomplete['query_table'];
+      autocomplete['query'] += " WHERE " + autocomplete['query_condition'];
+
+      autocomplete['displayBlock'] = 'message';
+      autocomplete['dataKey'] =  'data';
+
+      this.Autocomplete = autocomplete;
+    }
+
+    $rootScope.$broadcast('parametersExtended');
+
+  },
+
+  /** Enable Highlighting at various stages **/
+  service.setClasses = function (keys, value) {
+      var default_class = '';
+      var highlightClass = 'form-group has-error text-warning';
+      this.highlightClass = highlightClass;
+
+      for (var i=0; i<keys.length; i++) { 
+        key = keys[i];
+        key = key.replace(/\s/g,'');
+        if (value == keys[i]) { this.highlight[key] = highlightClass }
+        else { this.highlight[key] = '' }
+      }
+      $rootScope.$broadcast('setClasses');
+  }
 
   /** Load Lookup Table **/
   service.loadLookup = function (url, table, model, def) { 
@@ -254,7 +256,7 @@ app.factory('Nto1Factory', function($rootScope, $http){
 
   /********** Add Item to List  **********/
   service.addItem = function( columnData, currentItems, scope) {
-        if (currentItems) { this.items = currentItems }
+        if (currentItems) { this.include[scope] = currentItems }
           
         console.log('smart add item in service ' + typeof currentItems);
 
@@ -286,12 +288,14 @@ app.factory('Nto1Factory', function($rootScope, $http){
         if (scope) { add[scope] = thisitem }
         else { add = thisitem }
 
-        this.items.push( add );
+        if (!this.include[scope]) { this.include[scope] = [] }
+
+        this.include[scope].push( add );
         console.log(JSON.stringify(add));
 
         console.log('added item via service ...');
 
-        $rootScope.$broadcast('listUpdated');
+        $rootScope.$broadcast("listUpdated(scope)");
         service.notePendingChange("Added Item(s)");    
   }
 

@@ -74,7 +74,7 @@ app.controller('Nto1Controller',
 
     $scope.setup= function (config) {
         console.log('generic setup');
-        console.log(JSON.stringify(config));
+        console.log("SETUP CONFIG: " + JSON.stringify(config));
         if (config) {
             $scope.config = config; // JSON.parse(config);           
         }
@@ -91,10 +91,11 @@ app.controller('Nto1Controller',
         console.log("Initializing...");
 
         $scope.items = [];
+        $scope.include = {};
         $scope.activeIndex = 0;
 
             
-        console.log("config:" + JSON.stringify(config));
+        console.log("** config:" + JSON.stringify(config));
         // $scope.username = $rootScope.getUsername();
         $scope.username = config['user'];
     
@@ -103,7 +104,7 @@ app.controller('Nto1Controller',
         $scope.editedRecords = [];
 
         /** Initialize smartSearch options **/
-
+        return; 
     }
 
     $scope.saveRecord = function () {
@@ -214,9 +215,6 @@ app.controller('Nto1Controller',
         else {
             $scope[model] = {};
 
-            console.log("API = " + url + ' -> ' + table + ' ' + index + ': ' + model + '[default = ' + def + '] ' + condition);
-            console.log(JSON.stringify($scope.items));
-
             Nto1Factory.loadLookup(url, table, model, def);
         }
 
@@ -251,10 +249,12 @@ app.controller('Nto1Controller',
     });
 
 
-    $scope.$on('listUpdated', function() {
+    $scope.$on('listUpdated', function (model) {
+        $scope.include[model] = Nto1Factory.include[model];
         $scope.items = Nto1Factory.items;
         console.log(' service updated list to ' + $scope.items.length);
-    });
+        console.log(' service updated list to ' + $scope.include[model].length);
+   });
 
     $scope.editMode = function (toggle) {
         if (toggle) {
@@ -287,9 +287,15 @@ app.controller('Nto1Controller',
             console.log(att + ' = ' + $scope[att]);
         }
         console.log("** Items: **");
-        for (var i= 0; i<$scope.items.length; i++)  {
-            console.log(JSON.stringify($scope.items[i]))
+        for (var i= 0; i<$scope.include[model].length; i++)  {
+            console.log(JSON.stringify($scope.include[model][i]))
         }
+
+        for (var i= 0; i<$scope.items.length; i++)  {
+            console.log("* V " + JSON.stringify($scope.items[i]))
+        }
+
+
         console.log("** Lookups: **");
         console.log(JSON.stringify($scope.Lookup));
         console.log("** Column/Fields **");
@@ -303,6 +309,8 @@ app.controller('Nto1Controller',
     $scope.loadRecord = function(urlRequest, recordId, query) {
         console.log('load Record: ' + recordId);
         var recordData = [];
+
+        var includeClass = $scope.includeClass;
 
         if (!urlRequest || !recordId) { console.log("Error loading record without url and recordID"); return $q.when(null) }
         
@@ -318,7 +326,10 @@ app.controller('Nto1Controller',
             
             $scope.reloadConfig();
 
-            $scope.items = [];           
+            $scope.items = [];  
+            
+            if (! $scope.include[includeClass]) { $scope.include[includeClass] = [] }
+
             for (var i=0; i<recordData.length; i++) {
                  if (i == 0) {
                      for (var att in $scope.Map) {
@@ -352,11 +363,15 @@ app.controller('Nto1Controller',
                  thisitem['saved'] = 1;
 
                  $scope.items.push(thisitem);
+                $scope.include[includeClass].push(thisitem);
+
 
                  $scope.pendingChanges = [];
                  console.log('added item ' + i + ':' + JSON.stringify(thisitem));
                  console.log($scope.items.length + "Total items added");
+                 console.log($scope.include[includeClass].length + "Total items added");
             }
+            console.log($scope.include[includeClass].length + "Total items added");
             console.log($scope.items.length + "Total items added");
 
         })
@@ -370,21 +385,22 @@ app.controller('Nto1Controller',
     /********** Save Item **********/
     $scope.saveItem = function (index, model) {
 
-        var keys = Object.keys($scope.items[index]);
+        // var keys = Object.keys($scope.items[index]);
+        var keys = Object.keys($scope.include[model][index]);
         var data = {};
 
         for (var j=0; j<keys.length; j++) {
             var key = keys[j];
-            console.log(index + " KEY: " + key + " = " + typeof $scope.items[index][key])
-            if ( $scope.items[index][key] && typeof $scope.items[index][key] != 'object' ) {
+            console.log(index + " KEY: " + key + " = " + typeof $scope.include[model][index][key])
+            if ( $scope.items[index][key] && typeof $scope.include[model][index][key] != 'object' ) {
                 console.log("SET " + key);
-                data[key] = $scope.items[index][key];
+                data[key] = $scope.include[model][index][key];
             }
-            else if ($scope.items[index][key] && $scope.items[index][key][key + '_id']) {
-                data[key] = $scope.items[index][key][key + '_id'];
+            else if ($scope.include[model][index][key] && $scope.include[model][index][key][key + '_id']) {
+                data[key] = $scope.include[model][index][key][key + '_id'];
             }
-            else if ($scope.items[index][key] && $scope.items[index][key]['id']) {
-                data[key] = $scope.items[index][key]['id'];
+            else if ($scope.include[model][index][key] && $scope.include[model][index][key]['id']) {
+                data[key] = $scope.include[model][index][key]['id'];
             }
         }       
 
@@ -395,17 +411,20 @@ app.controller('Nto1Controller',
         // update database ... 
         return $http.post("/" + model, JSONdata)
         .then ( function (res) {
-            $scope.items[index]['DBstatus'] = 'saved';
+            $scope.include[model][index]['DBstatus'] = 'saved';
         }); 
     }
 
     /********** Delete Item **********/
-    $scope.deleteItem = function ( index ) {
-        console.log('Remove item :' + index);
-        console.log("initial length: " + $scope.items.length);
-        $scope.items.splice(index, 1); 
+    $scope.deleteItem = function (model, index) {
+
+        if (! model) { model = $scope.includeClass }
+
+        console.log('Remove ' + model + ' : ' + index );
+        console.log("initial length: " + $scope.include[model].length);
+        $scope.include[model].splice(index, 1); 
         $scope.notePendingChange("Deleted Item(s) " + index);    
-        console.log("new length: " + $scope.items.length);
+        console.log("new length: " + $scope.include[model].length);
    }
         
     $scope.notePendingChange = function (message) {
@@ -426,8 +445,10 @@ app.controller('Nto1Controller',
         }
     }
 
-    $scope.clearScope = function () {
+    $scope.clearScope = function (model) {
         $scope.items = [];
+        $scope.include[model] = [];
+
         for (var i=0; i < $scope.attributes.length; i++) {
             var att = $scope.attributes[i];
             $scope[att] = '';
@@ -462,15 +483,18 @@ app.controller('Nto1Controller',
     /** Custom Actions **/
     /* enable specific atts to be inherited from item to main class - alert on conflict */
     $scope.inheritItemAttribute = function (index, atts, errMsg) {
+        
         var conflicts = [];
+        var model  = $scope.includeClass;
+
         for (var i=0; i<atts.length; i++) {
             var att = atts[i];
             var current = $scope[att];
             if (current == undefined) {
-                $scope[att] = $scope.items[index][att];
+                $scope[att] = $scope.include[model][index][att];
                 console.log('set ' + att + ' to ' + $scope[att]);
             }
-            else if (current == $scope.items[index][att]) {
+            else if (current == $scope.include[model][index][att]) {
                 console.log(att + ' concurs...');
             }
             else {

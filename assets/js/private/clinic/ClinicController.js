@@ -7,7 +7,7 @@ app.controller('ClinicController',
     function clinicController ($scope, $http, $q, Nto1Factory) {
 
     console.log('loaded clinic controller');        
-
+    $scope.context = 'Clinic';
     /** Interact with standard N21 controller **/
 
     /** phased out ?? **/
@@ -23,13 +23,14 @@ app.controller('ClinicController',
         if ($scope.recordStatus == 'Draft') { 
           $scope.$parent.created = $scope.timestamp; 
         }
-        if ($scope.items) {
-            for (var i=0; i < $scope.items.length; i++) {
-                if ($scope.$parent.items[i].arrivalTime) {
-                    $scope.$parent.items[i].Wait_Time = Nto1Factory.timediff($scope.items[i].arrivalTime, $scope.now);
+        if ($scope.include.appointment) {
+            for (var i=0; i < $scope.include.appointment.length; i++) {
+                if ($scope.$parent.include.appointment[i].arrivalTime) {
+                    $scope.$parent.include.appointment[i].Wait_Time = Nto1Factory.timediff($scope.include.appointment[i].arrivalTime, $scope.now);
                 }
             }
         }
+       
         $scope.$apply();
     }, update_seconds*1000);
 
@@ -39,6 +40,7 @@ app.controller('ClinicController',
     /** run PRIOR to standard initialization  */
     $scope.setup = function (config) {
         $scope.$parent.itemClass = 'appointment';
+        $scope.$parent.includeClass = 'appointment';
         $scope.$parent.mainClass = 'clinic';
         
         $scope.$parent.statusField = 'status';
@@ -135,69 +137,73 @@ app.controller('ClinicController',
 
     $scope.initialize = function( config ) {
         $scope.setup(config);
-        $scope.$parent.initialize(config);
 
-        $scope.$parent.highlightBackground = "background-color:#9C9;";
-        var highlight_element = document.getElementById('clinicTab');
-        if (highlight_element) {
-            highlight_element.style=($scope.highlightBackground)
-        }
+        $q.when ($scope.$parent.initialize(config) )
+        .then ( function (res) {
 
-        if ($scope.recordId) { $scope.loadRecord($scope.recordId) }
-        else {
-            console.log("Initialize " + $scope.$parent.statusField + '=' + $scope.statusDefault);
-            if ($scope.statusField ) {
-                if ($scope[$scope.statusField] === undefined) {
-                    $scope.$parent[$scope.statusField] = $scope.statusDefault;
-                    console.log('set default status to' + $scope.recordStatus);
-                }
-                Nto1Factory.setClasses($scope.statusOptions, $scope[$scope.statusField]);  
+            $scope.$parent.highlightBackground = "background-color:#9C9;";
+            var highlight_element = document.getElementById('clinicTab');
+            if (highlight_element) {
+                highlight_element.style=($scope.highlightBackground)
             }
-        }
-            
-        console.log("still have " + $scope.clinic.appointments.length + " clinic appointments");
 
-        $scope.ac_options = JSON.stringify($scope.Autocomplete);
+            if ($scope.recordId) { $scope.loadRecord('appointment', $scope.recordId) }
+            else {
+                console.log("Initialize " + $scope.$parent.statusField + '=' + $scope.statusDefault);
+                if ($scope.statusField ) {
+                    if ($scope[$scope.statusField] === undefined) {
+                        $scope.$parent[$scope.statusField] = $scope.statusDefault;
+                        console.log('set default status to' + $scope.recordStatus);
+                    }
+                    Nto1Factory.setClasses($scope.statusOptions, $scope[$scope.statusField]);  
+                }
+            }
+                
+            console.log("Include " + $scope.clinic.appointments.length + " clinic appointments");
 
-        $scope.$parent.manualSet = []; /* 'Request_Notes'];  /* manually reset */
+            $scope.ac_options = JSON.stringify($scope.Autocomplete);
+
+            $scope.$parent.manualSet = []; /* 'Request_Notes'];  /* manually reset */
+        });
+
     }
 
 
   /********** Add Item to List of Requests **********/
     $scope.addItem = function( ) {
-        Nto1Factory.addItem( $scope.itemColumns, $scope.items, 'patient');
+        Nto1Factory.addItem( $scope.itemColumns, $scope.include, 'appointment');
         
-        var index = $scope.items.length - 1;
-        console.log('added patient to queue ' + index);
+        var index = $scope.include.appointment.length - 1;
+        console.log('added appointment to queue ' + index);
 
         $scope.items[index].status = 'Queued';
         $scope.items[index].arrivalTime = $scope.now;
         $scope.items[index].staff = $scope.user.id;
         $scope.items[index].clinic = $scope.clinic.id;
 
-        $scope.items[index].position = $scope.items.length;
+        $scope.items[index].position = $scope.include.appointment.length;
     
         // $scope.items.push(add);        
      
         return $scope.saveItem(index, 'appointment')
         .then ( function () {
             // add to clinic appointments which mirrors items... 
-            $scope.$parent.clinic.appointments = $scope.items;  
+            $scope.$parent.clinic.appointments = $scope.include.appointment;  
         });
 
     }
 
-    $scope.deleteItem = function (index) {
-        
-        $scope.items = $scope.clinic.appointments;
+    $scope.deleteItem = function (model, index) {
+ 
+        var deleted = $scope.include[model][index]['position'];
 
-        var deleted = $scope.items[index]['position'];
-
-        $q.when ( $scope.$parent.deleteItem(index) )
+        $q.when ( $scope.$parent.deleteItem(model, index) )
         .then (function (res) {
-            for (var i=0; i< $scope.items.length; i++) {
-                if ($scope.items[index]['position'] > deleted ) {
-                    $scope.$parent.items[index]['position']--;
+            for (var i=0; i< $scope.include[model].length; i++) {
+                if ($scope.include[model][i]['position'] > deleted ) {
+                    //console.log("swap " + index + ' record from pos: ' + $scope.$parent.include[model][i]['position']);
+                    $scope.$parent.include[model][i]['position']--;
+                    //console.log('to pos: ' + $scope.$parent.include[model][i]['position']);
                 }
             }
         });
@@ -276,8 +282,10 @@ app.controller('ClinicController',
         var startTime;
         var endTime; 
 
-        $scope.$parent.clinic.appointments = $scope.items;
+        $scope.$parent.clinic.appointments = $scope.include.appointment;
         if ($scope.clinic && $scope.clinic.appointments) {
+            console.log("NOW HAVE " + $scope.clinic.appointments.length + ' vs ' + $scope.include.appointment.length );
+
             for (var i=0; i< $scope.clinic.appointments.length; i++) {
                 if ( $scope.$parent.clinic.appointments[i]['id'] == appointment_id ) {
                     startTime = $scope.clinic.appointments[i]['startTime'];
@@ -313,7 +321,7 @@ app.controller('ClinicController',
     $scope.createRecord = function() {
             console.log("Post " + $scope.mainClass);
 
-            for (var i=0; i<$scope.items.length; i++) {
+            for (var i=0; i<$scope.include.appointment.length; i++) {
 
             }
 
@@ -322,7 +330,7 @@ app.controller('ClinicController',
                 'Queue_Creation_Date' : $scope.timestamp,
                 'FK_Clinic__ID' : $scope.Clinic_ID,
                 'Queue_Status' : 'Active',
-                'items' : $scope.items,
+                'items' : $scope.include.appointment,
                 'map'   : $scope.itemSet,
             }; 
 
@@ -363,8 +371,8 @@ app.controller('ClinicController',
         console.log("** message **");
         console.log($scope.mainMessage);
         console.log("** Local Items: **");
-        for (var i= 0; i<$scope.items.length; i++)  {
-            console.log(JSON.stringify($scope.items[i]))
+        for (var i= 0; i<$scope.include.appointment.length; i++)  {
+            console.log(JSON.stringify($scope.include.appointment[i]))
         }
         console.log("** item Maps **");
         console.log('Set: ' + JSON.stringify($scope.Set));

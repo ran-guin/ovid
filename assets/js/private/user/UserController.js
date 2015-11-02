@@ -10,10 +10,18 @@ app.controller('UserController',
 
     $scope.Clinics = {};
 
-    $scope.initialize = function(id) {
-        console.log('load ' + id);
+    $scope.context = 'User';
 
-        $http.get('/clinic')
+    $scope.initialize = function(config) {
+        console.log('load : ' + JSON.stringify(config));
+
+        $scope.setup(config);
+        var token = config.token;
+
+        $q.when ($scope.$parent.initialize(config) )
+        .then ( function (res) {
+
+            $http.get('/clinic?token=' + token)
             .success ( function (response) {
                 console.log("Initialized User page");
 
@@ -24,6 +32,7 @@ app.controller('UserController',
                 console.log("Error loading clinics");
                 console.log(error);
             });  
+        });
     }
 
 }]);
