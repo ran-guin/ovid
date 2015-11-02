@@ -26,16 +26,26 @@ module.exports.policies = {
   *                                                                          *
   ***************************************************************************/
 
-  // '*': true,
-  '*': 'flash',
+  //'*': true,
+  '*': ['tokenAuthorized'],
   'demo' : {
       '*' : true
   },
+  
+  /*
+  session: {
+      'create' : true,
+      'login' : true,
+  },
+*/
+  record: {
+      'lookup' : true,
+  },
+
   user: {
-      'new' : "flash",
-      'signup' : "flash",
-      'dashboard' : 'flash',
-      '*' : "sessionAuth"
+      'create' : true,
+      'login' : true,
+//      '*' : "sessionAuth"
   },
 
   // enable testing during development mode 
