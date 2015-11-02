@@ -63,6 +63,14 @@ module.exports = {
     }
   },
 
+  payload : function (id, access) {
+      // generate standard payload 
+      var url = sails.config.globals.url;
+
+      var payload = { user: id, access: access, url: url};
+      return payload;
+  }
+
 
 };
 

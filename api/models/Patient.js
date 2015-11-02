@@ -5,6 +5,8 @@
 * @docs        :: http://sailsjs.org/#!documentation/models
 */
 
+var moment = require('moment');
+
 module.exports = {
 
   tableName     : 'patient',
@@ -78,6 +80,10 @@ module.exports = {
     Patient.findOne( conditions )
     .then ( function (patientData) {
       
+      var age = moment().diff(moment(patientData.birthdate), 'years');
+      patientData.ageYrs = age;
+      console.log('loaded PATIENT : ' + age);
+
       data.patient = patientData;
       var patient_id = patientData.id;
 
@@ -93,7 +99,7 @@ module.exports = {
 
             Recommendation.load({ patient_id : patient_id, treatments: treatments} , function (err, recommendation) {
                   data['schedule'] = recommendation.schedule;
-                   data['protectionMap'] = recommendation.protectionMap;
+                  data['protectionMap'] = recommendation.protectionMap;
                  
                   cb(null, data);   
             });  
