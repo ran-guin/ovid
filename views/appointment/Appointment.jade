@@ -36,7 +36,7 @@ block content
                           b Patient 
 
                         td
-                          b {{ patient.firstName }} {{ patient.lastName }} [ {{ patient.age }} yr old {{ patient.gender }} ]
+                          b {{ patient.firstName }} {{ patient.lastName }} [ {{ patient.age }} = {{ patient.ageYrs }} yr old {{ patient.gender }} ]
                       tr
                         td
                           b Birthdate: 
@@ -57,97 +57,15 @@ block content
                           b {{ clinic.name }} [ {{ clinic.id }} ]
                       tr 
                         td {{ clinic.address }}
+                          
                   td.col-md-4(align='center')
-                     div(ng-if="patient.id")
-                      table.table
-                        tr
-                          td(colspan=4) 
-                            h4 Active Protection 
-                        tr.active
-                          td Vaccine
-                          td Taken
-                          td Protects Against
-                          td Expires
-                        tr.success(ng-repeat="applied in treatments")
-                          td( style="vertical-align:middle") {{ applied.vaccine.name }}
-                          td {{ applied.applied | date:'MMM d, yyyy' }}
-                          td
-                            table
-                              tr(ng-repeat = "protect in protection.Diseases[applied.vaccine.name]")
-                                td {{ protect }}
-                          td( style="vertical-align:middle") {{ applied.expiry | date:'MMM d, yyyy' }}
+                    div(ng-if="patient.id")
+                      include ./../user/Current_Immunization.jade
                           
                   td.col-md-4(align='right')
                     div(ng-if="patient.id")
-                      table.table(ng-init="loadRecommendations(#{JSON.stringify(schedule)}); loadTravel();")
-                        tr
-                          td &nbsp;
-                          td(colspan=2)
-                            h4 Current Vulnerability: 
-                          td(colspan=2) [ Region = {{ patient.region }} ]
-                        tr.active
-                          th Disease
-                          th Vaccine
-                          th Recommendation
-                          th Status
-                          th Load
+                      include ./../user/Pending_Immunization.jade
 
-                        tr.danger(ng-repeat="need in schedule")
-                            td {{ need.disease.name }}
-                            td 
-                              span(ng-if="need.vaccine.name == undefined")
-                                span choose one...
-                              span(ng-if="need.vaccine.name ")
-                                span {{ need.vaccine.name }}
-                            td {{ need.recommendation }}
-                            td &nbsp;
-                            td
-                              a.btn.btn-primary.btn-xs(
-                                tabindex="0"
-                                data-trigger='focus'
-                                data-toggle='popover'
-                                data-html="true"
-                                data-placement='left' 
-                                ng-click="loadScheduledVaccinations(need.disease)" 
-                                title="Load Scheduled Vaccinations" 
-                                data-content="This would dynamically load suggested vaccinations by retrieving via API all pending suggested vaccinations based on:<UL><LI>vaccination history</LI><LI>patient age</LI><LI>location</LI><LI>scheduled travel itinerary</LI></UL><P><B>Vaccines added below for Example Only</B></P>"
-                                ) 
-                                i.fa.fa-question-circle
-                        tr
-                          td &nbsp;
-                          td(colspan=2) 
-                            h4 Travel Requirements: 
-                             a.btn.btn-success.btn-xs(ng-click="addTravel()" onclick="alert('Add modal to Manage travel plans')") +
-                        tr.active
-                          th Region
-                          th Disease
-                          th Recommendation
-                          th Status
-                          th Load
-                        tr.warning(ng-repeat="itin in travel")
-                          td 
-                            b {{itin.region}}
-                          td {{itin.start}}
-                          td {{itin.finish}}
-                          td 
-                            button.btn.btn-danger.btn-xs(ng-click="deleteTravel($index)") x
-                          td
-                            a.btn.btn-primary.btn-xs(
-                              tabindex="0"
-                              data-trigger='focus'
-                              data-toggle='popover'
-                              data-html="true"
-                              data-placement='left' 
-                              ng-click="loadScheduledVaccinations(need.disease)" 
-                              title="Load Scheduled Vaccinations" 
-                              data-content="This would dynamically load suggested vaccinations by retrieving via API all pending suggested vaccinations based on:<UL><LI>vaccination history</LI><LI>patient age</LI><LI>location</LI><LI>scheduled travel itinerary</LI></UL><P><B>Vaccines added below for Example Only</B></P>"
-                              ) 
-                              i.fa.fa-question-circle
-                        tr
-                          td &nbsp;
-                          td(colspan=2)
-
-                          td &nbsp;
                     div(ng-if="!patient.id")
                       // should never get here .... 
                       table.table(ng-init="loadQueue()")
@@ -247,45 +165,6 @@ block content
                       hr
                       div#insideModal
                     div.modal-footer
-                      button.btn.btn-default(type="button button-danger" data-dismiss="modal") Close
-
-            if debugMode
-              hr(style='border-width:thick; border-color:black;')
-              .container(style='width:90%')
-                h3 Development Feedback (for Debugging purposes only) :
-
-                div(ng-if="clinic") 
-                  b Clinic : {{ JSON.stringify(clinic) }}
-
-                h3 check jade input for: User, clinic, patient, treatment, appointment, schedule, protection, Config
-                if User
-                  div.alert.alert-warning User: #{JSON.stringify(User)}
-                if clinic
-                  div.alert.alert-danger Clinic: {{JSON.stringify(clinic)}}
-                if patient
-                  div.alert.alert-danger Patient: #{JSON.stringify(patient)}
-                if treatment
-                  div.alert.alert-danger Treatment: #{JSON.stringify(treatment)}
-                if appointment
-                  div.alert.alert-danger Appointment: #{JSON.stringify(appointment)}
-                if schedule
-                  div.alert.alert-danger Schedule: #{JSON.stringify(schedule)}
-                if protectionMap
-                  div.alert.alert-danger Protection: #{JSON.stringify(protectionMap)}
-                if config 
-                  div.alert.alert-danger Config: #{JSON.stringify(config)}
-
-                h3 check ANGULAR input for: clinic, patient, treatments, appointment, schedule, protection, Config
-                div(ng-if="clinic")
-                  div.alert.alert-danger Clinic: {{clinic}}
-                div(ng-if="patient")
-                  div.alert.alert-danger Patient: {{ patient }}
-                div(ng-if="protectionMap")
-                  div.alert.alert-danger Protection: {{protectionMap}}
-                div(ng-if="appointment")
-                  div.alert.alert-danger Appointment: {{appointment}}
-                div(ng-if="treatments")
-                  div.alert.alert-danger Treatments: {{treatments}}
-                div(ng-if="schedule")
-                  div.alert.alert-danger schedule: {{schedule}}
-   
+                      button.btn.btn-default(type="button button-danger" data-dismiss="modal") close
+            include ./../debugDump
+ 

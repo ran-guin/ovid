@@ -1,4 +1,4 @@
-table.table(ng-init="loadTravel();")
+table.table(ng-init="loadRecommendations(#{JSON.stringify(schedule)}); loadTravel();")
   tr
     td &nbsp;
     td(colspan=2)
@@ -67,3 +67,5 @@ table.table(ng-init="loadTravel();")
     td(colspan=2)
 
     td &nbsp;
+
+

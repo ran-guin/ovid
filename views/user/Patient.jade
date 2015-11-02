@@ -7,7 +7,7 @@ block content
     div(ng-app="myApp")
 
       - var url = session.url
-      - var config = {User: User, clinic: clinic, patient: patient, schedule : schedule};
+      - var config = {User: User, clinic: clinic, patient: patient, schedule : schedule, protectionMap : protectionMap, appointment:appointment, treatments:treatments, token:token };
       - var init = "initialize(" + JSON.stringify(config) + ")";
 
       div(ng-controller="Nto1Controller")
@@ -20,15 +20,15 @@ block content
             <!-- Nav tabs -->
             ul.nav.nav-tabs(role="tablist")
               li(role="presentation")
-                a(href="#home" aria-controls="home" role="tab" data-toggle="tab") Home
+                a(href="#profile" aria-controls="profile" role="tab" data-toggle="tab") Profile
               li.active(role="presentation")
-                a(href="#clinics" aria-controls="clinics" role="tab" data-toggle="tab") Clinics
-              li(role="presentation")
-                a(href="#work" aria-controls="work" role="tab" data-toggle="tab") Work Stats
+                a(href="#Protection" aria-controls="Protection" role="tab" data-toggle="tab") Protection
+              li(role="scheduled")
+                a(href="#scheduled" aria-controls="scheduled" role="tab" data-toggle="tab") Required
 
             <!-- Tab panes -->
             div.tab-content
-              div.tab-pane#home(role="tabpanel")
+              div.tab-pane#profile(role="tabpanel")
                 p &nbsp;
                 h3 Profile:
                 table.table
@@ -40,28 +40,19 @@ block content
                     td {{ patient.email }}
                 hr
 
-              h3 Immunization Status:
-              include Pending_Immunization.jade
 
-              div.tab-pane.active#clinics(role="tabpanel")
+              div.tab-pane.active#Protection(role="tabpanel")
                 p &nbsp;
-                h3 My Clinics:
-                // temporary 
-                table.table
-                  tr(ng-repeat = "clinic in Clinics")
-                    td 
-                      b {{ clinic.name }}
-                    td 
-                      a(href="/clinic/home/{{clinic.id}}")
-                        b Appointments 
+                h3 Current Protection:
+                include Current_Immunization.jade
 
-              div.tab-pane#work(role="tabpanel")
-                p &nbsp;
-                b ... Work Statistics ...
+              div.tab-pane#scheduled(role="tabpanel")
+                include Pending_Immunization.jade
 
           if ! User
             h3 no User defined... 
 
             div.alert.alert-danger #{JSON.stringify(User)}
+          include ./../debugDump.jade
 
 

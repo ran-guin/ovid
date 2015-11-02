@@ -18,13 +18,14 @@ div#smartSearch(style='display:#{v0}')
     button#hideSS(onclick="document.getElementById('smartSearch').style.display='none'; document.getElementById('showSS').style.display='block';") x
 
     form#addItemForm()
-          h4 #{page.search_title}
+          if search_title
+            h4 #{page.search_title}
           div#addMessage
 
           table.table.table-bordered.table-hover
             thead
               tr.active.alert-success
-                if (page.add_to_scope)
+                if (page && page.add_to_scope)
                   th &nbsp;
 
                 th(ng-repeat="col in SearchOn")
@@ -33,7 +34,7 @@ div#smartSearch(style='display:#{v0}')
                   div(ng-if="!col.label")
                     span {{col.field}}
               tr#inputRow
-                if (page.add_to_scope) 
+                if (page && page.add_to_scope) 
                   td 
                     button.btn.btn-success(ng-click="addItem()") Add
                 td(ng-repeat="col in SearchOn")

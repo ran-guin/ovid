@@ -2,7 +2,7 @@ extends ./../layout
 block content
  div(style="margin-top:50px") 
   div.alert.alert-info Clinic Home Page 
-  - var debugMode = 1
+  - var debugMode2 = 1
 
   .container(style='width:90%')
     div(ng-app="myApp")
@@ -79,12 +79,12 @@ block content
                         b &nbsp; ( {{clinic.staff.length}} staff currently assigned to this clinic)
 
               hr
-              h3 Queue: [ {{ clinic.appointments.length }} ] {{ token }}
+              h3 Queue: [ {{ include.appointment.length }} ] {{ token }}
 
               h5 Items:
               h6 {{ JSON.stringify(items) }}
 
-              div(ng-if="clinic.appointments.length")
+              div(ng-if="include.appointment.length")
                 table.table.table-bordered
                   tr.active
                     td &nbsp;
@@ -108,9 +108,9 @@ block content
                       b Session          
                     td 
                       b Status
-                  tr(ng-repeat="q in clinic.appointments")
+                  tr(ng-repeat="q in include.appointment")
                     td
-                      button.btn.btn-danger.btn-xs(type='button' value="Delete" ng-click="deleteItem($index)") X
+                      button.btn.btn-danger.btn-xs(type='button' value="Delete" ng-click="deleteItem('appointment',$index)") X
                       span &nbsp;
                       button.btn.btn-warning.btn-xs(type='button' data-toggle='modal' data-target='#editItemModal') Edit
                       span(ng-if="q.DBstatus == 'saved'") 
@@ -121,7 +121,7 @@ block content
                     td {{ q.patient.lastName }} 
                     td {{ q.patient.firstName }}
                     td {{ q.patient.birthdate }} 
-                    td {{ q.patient.identifier_type }} : {{ q.patient.identifer }}
+                    td {{ q.patient.identifierType }} : {{ q.patient.identifier }}
                     td 
                       table(width='100%')
                         tr
@@ -133,7 +133,7 @@ block content
                           td(align='right')
                             span(ng-if="2") 
                               // if user has access to treatment 
-                              a.btn.btn-primary.btn-xs(href="/appointment/home/{{q.id}}") Treat
+                              a.btn.btn-primary.btn-xs(href="/appointment/home/{{q.id}}?token=#{token}") Treat
 
                     td {{ q.Wait_Time }}
                     td {{ q.Site_Name }}
@@ -188,29 +188,5 @@ block content
                   div.modal-footer
                     button.btn.btn-default(type="button button-danger" data-dismiss="modal") Close
 
-            if debugMode
-              hr(style='border-width:thick; border-color:black;')
-              .container(style='width:90%')
-                h3 Development Feedback (used for Debugging purposes only) :
-
-                if User
-                  div.alert.alert-warning User: #{JSON.stringify(User)}
-                //- if clinic
-                //-   div.alert.alert-danger Clinic: #{JSON.stringify(clinic)}
-                if patient
-                  div.alert.alert-danger Patient: #{JSON.stringify(patient)}
-                if treatment
-                  div.alert.alert-danger Treatment: #{JSON.stringify(treatment)}
-                if Config 
-                  div.alert.alert-danger Config: #{JSON.stringify(Config)}
-                if clinic && clinic.staff
-                  div.alert.alert-danger Clinic Staff: 
-                    ul
-                      li(ng-repeat = "staff in clinic.staff")
-                        b {{ staff }}
-                if clinic && clinic.appointments
-                  div.alert.alert-danger Clinic Appointments: 
-                    ul
-                      li(ng-repeat = "appointment in clinic.appointments")
-                        b {{appointment}}
-
+            hr
+            include ./../debugDump.jade

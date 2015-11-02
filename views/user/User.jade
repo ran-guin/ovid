@@ -8,11 +8,17 @@ block content
 
       - var url = session.url
       - var config = {User: User, clinic: clinic, patient: patient};
-      - var init = "initialize(" + JSON.stringify(config) + ")";
+      - var init = "initialize()";
 
       div(ng-controller="Nto1Controller")
        div(ng-controller="UserController" ng-init="#{init}")
-
+        if Debug
+          b Token: #{token}
+          br
+          b User: #{user}
+          br
+          b Access: #{access}
+        hr
         div#topMessage
 
         if User
@@ -37,9 +43,10 @@ block content
                     td #{val}
 
             h3 Member Clinics:
-            - var preload = "loadLookup('" + url + "/lookup/clinic', 'clinic', 'Clinics')"; 
+
+            - var preload = "loadLookup('http://limsdev06.bcgsc.ca:8081/lookup/clinic?token=#{token}', 'clinic', 'Clinics')"; 
             div(ng-dropdown-multiselect="" options="Lookup.Clinics.options" selected-model="Clinics", extra-settings="MenuSettings" ng-init="#{preload}")
-            b options = {{ Lookup.Clinics.options }}
+            b options = {{ Lookup.Clinics }}
             hr
 
             div.tab-pane.active#clinics(role="tabpanel")
@@ -47,11 +54,11 @@ block content
               h3 My Clinics:
               // temporary 
               table.table
-                tr(ng-repeat = "clinic in Clinics")
+                tr(ng-repeat = "clinic in Lookup.Clinics.options")
                   td 
-                    b {{ clinic.name }}
+                    b {{ clinic.label }}
                   td 
-                    a(href="/clinic/home/{{clinic.id}}")
+                    a(href="/clinic/home/{{clinic.id}}?token=#{token}")
                       b Appointments 
    
             div.tab-pane#work(role="tabpanel")
@@ -62,5 +69,11 @@ block content
           h3 no User defined... 
 
           div.alert.alert-danger #{JSON.stringify(User)}
-
-
+        
+        hr
+        b Token: #{token} : {{ token }}
+        hr
+        button
+          a(href="/clinic/1?token=#{token}") Go HOME
+          
+        include ./../debugDump.jade
