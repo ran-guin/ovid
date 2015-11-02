@@ -4,5 +4,6 @@ angular.module('myApp', [
         'ngCookies',
         'Nto1Factory',
         'angularjs-dropdown-multiselect',
+        'angularMoment',
         'ui.bootstrap',
 ]);
