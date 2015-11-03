@@ -33,7 +33,7 @@ module.exports = {
      		}
 
 			if (!result) {
-				console.log('no results');
+				console.log('no query results');
 				return res.send('');
 			}
 
