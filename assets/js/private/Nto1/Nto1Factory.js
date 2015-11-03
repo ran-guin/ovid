@@ -1,6 +1,6 @@
 var app = angular.module('myApp');
 
-app.factory('Nto1Factory', function($rootScope, $http){
+app.factory('Nto1Factory', function ($rootScope, $http) {
   var service = {};
 
   service.items = [];
@@ -33,28 +33,25 @@ app.factory('Nto1Factory', function($rootScope, $http){
   service.highlight = {};
  
   service.timediff = function (t1, t2, format) {
+      var wait = moment().diff(moment(t1), 'minutes');
+      var hours = wait/60;
 
-                    var seconds = (t2.getTime() - t1.getTime()) / 1000;
-                    var hours = '0';
-                    var minutes = '0';
+      if ( hours >  24 ) {
+        
+        var days = hours/24;
+        hours = hours - days*24;
 
-                    if (!format) { format = 'HH::MM::SS' }
+        wait = parseInt(days) + " days ";
+        if (hours > 0) { wait = wait +  parseInt(hours) + ' hour(s)' }
+      }
+      else if ( wait > 60 ) {
+        var minutes = wait - hours*60;
 
-                    if (seconds > 3600) {
-                        hours = parseInt(seconds/3600);
-                        seconds -= hours*3600;
-                    }
-                    if (seconds > 60) {
-                        minutes = parseInt(seconds/60);
-                        seconds -= minutes*60;
-                    }
-                    seconds = parseInt(seconds);
+        wait = parseInt(hours) + " Hours " + parseInt(minutes) + ' minute(s)';
+      }
+      else { wait = wait + ' minute(s)' }
 
-                    format.replace("HH", service.pad2(hours));
-                    format.replace("MM", service.pad2(minutes));
-                    format.replace("SS", service.pad2(seconds));
-
-                    return service.pad2(hours) + ':' + service.pad2(minutes) + ':' + service.pad2(seconds);   
+      return wait;
   }
 
   service.pad2 = function (int) {
@@ -179,6 +176,7 @@ app.factory('Nto1Factory', function($rootScope, $http){
 
       autocomplete['displayBlock'] = 'message';
       autocomplete['dataKey'] =  'data';
+      autocomplete['token'] =  autocomplete['token'] || 'undefWebToken';
 
       this.Autocomplete = autocomplete;
     }
@@ -288,8 +286,9 @@ app.factory('Nto1Factory', function($rootScope, $http){
         if (scope) { add[scope] = thisitem }
         else { add = thisitem }
 
-        if (!this.include[scope]) { this.include[scope] = [] }
-
+        console.log ('scope1: ' + JSON.stringify( this.include[scope] ));
+        if ( this.include[scope] == undefined ) { this.include[scope] = [] }
+        console.log ('scope2: ' + JSON.stringify( this.include[scope] ));
         this.include[scope].push( add );
         console.log(JSON.stringify(add));
 
