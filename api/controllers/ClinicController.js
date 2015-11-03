@@ -30,7 +30,7 @@ module.exports = {
 	        }
 
 	        if (!result) {
-	          console.log('no results');
+	          console.log('no home clinic results');
 	          return res.send('');
 	        }
 	        console.log('render clinic');
@@ -83,7 +83,7 @@ module.exports = {
      		}
 
 			if (!result) {
-				console.log('no results');
+				console.log('no list results');
 				return res.send('');
 			}
 
@@ -105,7 +105,7 @@ module.exports = {
      		}
 
 			if (!result) {
-				console.log('no results');
+				console.log('no new results');
 				return res.send('');
 			}
 
@@ -123,7 +123,7 @@ module.exports = {
      		}
 
 			if (!result) {
-				console.log('no results');
+				console.log('no add results');
 				return res.send('');
 			}
 
