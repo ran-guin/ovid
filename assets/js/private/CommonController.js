@@ -6,7 +6,10 @@ app.controller('CommonController',
         console.log('loaded Common Controller');
 
 
-        $scope.initialize = function( config ) {
+        $scope.setup = function( config ) {
+        	console.log('common setup');
+        	$scope.$parent.setup(config);
+
         	console.log('common init');
         	$q.when ( $scope.$parent.initialize(config) )
         	.then ( function (res) {
@@ -64,11 +67,17 @@ app.controller('CommonController',
 		        }   
 
 		        if (config && config.token) {
-		        	console.log('saved token to angular scope');
+		        	console.log('saved token to angular scope ' + config.token);
 		        	$scope.$parent.token = config.token;
 		        } 
+		        /*
+		        if (config && config.payload) {
+		        	console.log('saved payload ' + config.payload);
+		        	$scope.$parent.payload = config.payload;
+		        } 
+*/
 		 
-		        $scope.setup(config);
+		        
 		    });
 	    }
 
