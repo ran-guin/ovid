@@ -15,7 +15,7 @@ module.exports = {
             if (err) {  return res.negotiate(err) }
 
             if (!result) {
-              console.log('no results');
+              console.log('no patient results');
               return res.send('');
             }
             
