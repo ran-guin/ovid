@@ -62,13 +62,14 @@ app.controller('Nto1Controller',
 
     $scope.saved = {};
 
-    $scope.reloadConfig = function (config) {
+    $scope.reloadConfig = function () {
         if ($scope.config) {
             $scope.url = $scope.config['url'] ;
+            $scope.token = $scope.config['token'];
             $scope.userid = $scope.config['userid'];
             $scope.user = $scope.config['user'];
             $scope.recordId = $scope.config['recordId'];
-            console.log('reloaded config: ' + $scope.url + ' : ' + $scope.user);
+            console.log('reloaded config: ' + $scope.url + ' : ' + $scope.user +  ' -> ' + $scope.token);
         }
     }
 
@@ -392,7 +393,7 @@ app.controller('Nto1Controller',
         for (var j=0; j<keys.length; j++) {
             var key = keys[j];
             console.log(index + " KEY: " + key + " = " + typeof $scope.include[model][index][key])
-            if ( $scope.items[index][key] && typeof $scope.include[model][index][key] != 'object' ) {
+            if ( $scope.include[model][index][key] && typeof $scope.include[model][index][key] != 'object' ) {
                 console.log("SET " + key);
                 data[key] = $scope.include[model][index][key];
             }
@@ -406,10 +407,16 @@ app.controller('Nto1Controller',
 
 
         var JSONdata = JSON.stringify(data);
+ 
         console.log(i + " SaveData: " + JSONdata);
+        console.log("model: " + model);
+        //var header = { 'Authorization' : $scope.token };
 
-        // update database ... 
-        return $http.post("/" + model, JSONdata)
+        // update database using waterline built in functions ...  
+        return $http.post({
+            url : "/" + model, 
+            data : JSONdata, 
+        })
         .then ( function (res) {
             $scope.include[model][index]['DBstatus'] = 'saved';
         }); 
