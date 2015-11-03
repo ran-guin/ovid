@@ -39,6 +39,9 @@ app.controller('ClinicController',
 
     /** run PRIOR to standard initialization  */
     $scope.setup = function (config) {
+        $scope.$parent.setup(config);
+        console.log('Clinic setup');
+
         $scope.$parent.itemClass = 'appointment';
         $scope.$parent.includeClass = 'appointment';
         $scope.$parent.mainClass = 'clinic';
@@ -109,6 +112,7 @@ app.controller('ClinicController',
             url : '/api/search',
             view: 'clinic/Clinic',
             target : 'lastName',
+            token : $scope.token,
             show : "patient_id,lastName,firstName,gender,birthdate, identifier, identifierType",
             search : "patient_id,lastName,firstName,identifier, gender,birthdate",
             hide: 'patient_id',
@@ -121,7 +125,7 @@ app.controller('ClinicController',
             onEmpty : "No Patients found.<P><div class='alert alert-warning'>Please try different spellings or different field to search.<P>Please only add a new item if this item has never been received before.  <button class='btn btn-primary' type='button' data-toggle='modal' data-target='#newPatientModal'> Add New Patient </button></div>\n"
         };
 
-        console.log($scope.Autocomplete['url']);
+        console.log("URL / Token: " + $scope.Autocomplete['url'] + $scope.token);
          
         Nto1Factory.extend_Parameters($scope.Columns, $scope.itemColumns, $scope.Autocomplete);
 
@@ -137,6 +141,7 @@ app.controller('ClinicController',
 
     $scope.initialize = function( config ) {
         $scope.setup(config);
+        console.log('initialize clinic');
 
         $q.when ($scope.$parent.initialize(config) )
         .then ( function (res) {
@@ -171,18 +176,26 @@ app.controller('ClinicController',
 
   /********** Add Item to List of Requests **********/
     $scope.addItem = function( ) {
-        Nto1Factory.addItem( $scope.itemColumns, $scope.include, 'appointment');
-        
+        Nto1Factory.addItem( $scope.itemColumns, $scope.items, 'appointment');
+
+
         var index = $scope.include.appointment.length - 1;
         console.log('added appointment to queue ' + index);
-
+/*
         $scope.items[index].status = 'Queued';
         $scope.items[index].arrivalTime = $scope.now;
         $scope.items[index].staff = $scope.user.id;
         $scope.items[index].clinic = $scope.clinic.id;
 
         $scope.items[index].position = $scope.include.appointment.length;
-    
+*/
+        $scope.include['appointment'][index].status = 'Queued';
+        $scope.include['appointment'][index].arrivalTime = $scope.now;
+        $scope.include['appointment'][index].staff = $scope.user.id;
+        $scope.include['appointment'][index].clinic = $scope.clinic.id;
+
+        $scope.include['appointment'][index].position = $scope.include.appointment.length;
+
         // $scope.items.push(add);        
      
         return $scope.saveItem(index, 'appointment')
