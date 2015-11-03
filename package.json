@@ -5,6 +5,7 @@
   "description": "a Sails application",
   "keywords": [],
   "dependencies": {
+    "angular-loading-bar": "^0.8.0",
     "angular-moment": "^0.10.3",
     "bcrypt": "^0.8.4",
     "ejs": "~0.8.4",
