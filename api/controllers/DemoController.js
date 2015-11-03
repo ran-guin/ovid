@@ -70,30 +70,38 @@ module.exports = {
             console.log("payload: " + JSON.stringify(payload));
             var token = jwToken.issueToken(payload);
 
-            Params['User'] = userData;            
+            Params['User'] = userData;  
+            Params['token'] = token;
+            //Params['payload'] = payload; .. breaks something... 
+            
             req.token = token;
+
+            console.log('Token: ' + token);          
+            //req.token = token;
  
             Clinic.load( {'clinic_id' : demoClinic, include : { staff: true, appointments : true} }, function (err, clinicData) {         
                 if (err) {
-                  console.log('no results');
+                  console.log('no demo clinic results: ' + err);
                   return res.send('');
                 }
+                else {
+                    console.log("loaded clinic data..." + clinicData);
 
-                console.log("loaded clinic data..." + JSON.stringify(clinicData));
+                    var page = { 
+                        item_Class : 'patient',
+                        search_title : "Search for Patients using any of fields below",
+                        add_to_scope : true
+                    };
 
-                var page = { 
-                    item_Class : 'patient',
-                    search_title : "Search for Patients using any of fields below",
-                    add_to_scope : true
-                };
+                    Params['page'] = page;   
+                    console.log('page... clinic...'); 
+                    Params['clinic'] = clinicData;
 
-                Params['page'] = page;    
-                Params['clinic'] = clinicData;
-
-                console.log('-----');
-                console.log("**** Page Input: ****" + JSON.stringify(Params));
-                // res.send({"DEMO Clinic Data: " : req.session.param});
-                return res.render('clinic/Clinic', Params);
+                    console.log('-----');
+                    console.log("**** Page Input: ****" + JSON.stringify(Params));
+                    // res.send({"DEMO Clinic Data: " : req.session.param});
+                    return res.render('clinic/Clinic', Params);
+                }   
             });
  
         });
