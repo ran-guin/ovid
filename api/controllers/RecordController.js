@@ -23,7 +23,7 @@ module.exports = {
      		}
 
 			if (!result) {
-				console.log('no results');
+				console.log('no record results');
 				return res.send('');
 			}
 
