@@ -111,7 +111,7 @@ module.exports = {
     appointment : function (req, res) {
         console.log("Run Appointment Demo");
 
-       var demoAppointment = 1;
+        var demoAppointment = 1;
         var demoUser = 'demoNurse';
         var region   = 1;
 
@@ -138,7 +138,7 @@ module.exports = {
                 Params['treatments'] = data.treatments;
                 Params['schedule'] = data.schedule;
                 Params['protectionMap'] = data.protectionMap;
-
+                Params['clinic'] = data.clinic;
                 return res.render("appointment/Appointment", Params);
             });
         });
