@@ -51,6 +51,12 @@ module.exports.routes = {
   'GET /home': 'MainController.showMainPage',
 
   // Test views directly 
+  'GET /test/date'   : { view : 'test/DatePicker' },
+  'GET /test/date2'   : { view : 'test/Date' },
+  
+  'GET /test/dropdown'   : { view : 'test/Dropdown' },
+  'GET /test/drop'   : { view : 'test/Drop' },
+
   'GET /test/:option': 'TestController.test',
 
   'GET /demo/test': 'DemoController.test',
@@ -109,4 +115,5 @@ module.exports.routes = {
     'GET /cdc/regions'          : 'CdcController.regions',
     'GET /cdc/risks' : 'CdcController.risks',
 
+    'GET /travel/recommendations' : 'TravelController.recommendations',
 };
