@@ -112,8 +112,11 @@ module.exports = {
         	var patient_id = appointmentData.patient.id;
 
         	returnData.appointment = appointmentData;
+        	returnData.clinic = appointmentData.clinic;
 
         	Patient.load({patient : patient_id}, function (err, data) {
+        		if (err) { return cb("Error loading patient: " + err) }
+        			
                 returnData['patient'] = data.patient;
 	            returnData['treatments'] = data.treatments;
 	            returnData['schedule'] = data.schedule;
