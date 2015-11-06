@@ -6,6 +6,24 @@ app.controller('CommonController',
         console.log('loaded Common Controller');
 
 
+	    var start = new Date();
+	    $scope.timestamp = start.toISOString().slice(0, 19).replace('T', ' '); 
+	        
+	    $scope.lastMonth = new Date(start.getTime() - 30 * 24 * 60 * 60 * 1000 ).toISOString();
+	    $scope.nextMonth = new Date(start.getTime() + 30 * 24 * 60 * 60 * 1000 ).toISOString();
+
+	    /** timer with date + hours + minutes - automatically updates  **/
+	    var update_seconds = 1;
+	    setInterval (function() {
+	        var now = new Date();
+	        $scope.now = now;
+
+	        $scope.timestamp = now.toISOString().slice(0, 19).replace('T', ' ');
+	        $scope.created = now.toISOString().slice(0, 19).replace('T', ' ');
+
+	        $scope.$apply();
+	    }, update_seconds*1000);
+
         $scope.setup = function( config ) {
         	console.log('common setup');
         	$scope.$parent.setup(config);
@@ -81,18 +99,30 @@ app.controller('CommonController',
 		    });
 	    }
 
-	    $scope.loadTravel = function () {
-	        console.log("load travel plans...");
-	        var travel = [
-	            {
-	                'region' : 'South America',
-	                'start'  : '2015-09-01',
-	                'finish' : '2015-10-01',
-	            },{
-	                'region' : 'Spain',
-	                'start'  : '2016-02-01',
+	    $scope.loadTravel = function (patient_id) {
+	        console.log("load travel plans for patient #" + patient_id);
+	        
+	        var url = '/travel/recommendations?patient=' + patient_id;
+
+	        return $http( {
+	            method: 'GET',
+	            url : url,
+	            headers : { authorization : "Bearer " + $scope.token}
 	            }
-	        ];
-	        $scope.$parent.travel = travel;
+	        )
+	        .then ( function (response) {
+	        	if (response.data) {
+	        		console.log("Travel response: " + JSON.stringify(response.data));
+	            	$scope.$parent.travel = response.data;
+	        	}
+	        },
+	        function (err) { 
+	        	console.log("Error getting travel details: " + err);
+	        },
+	        function (update) {
+	        	console.log("update: " + update)
+	        });
+
 	    }
+
 }]);
