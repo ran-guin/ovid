@@ -142,26 +142,11 @@ app.controller('AppointmentController',
 
   /********** Add Item to List of Requests **********/
     $scope.addItem = function () {
-        Nto1Factory.addItem( $scope.itemColumns, $scope.items );
+        Nto1Factory.addItem( $scope.itemColumns, $scope.items, 'treatment' );
         var index = $scope.items.length - 1;
         console.log('added treatment...');
         $scope.$parent.items[index].status = 'requested';
 
-    }
-
-    $scope.loadTravel = function () {
-        console.log("load travel plans...");
-        var travel = [
-            {
-                'region' : 'South America',
-                'start'  : '2015-09-01',
-                'finish' : '2015-10-01',
-            },{
-                'region' : 'Spain',
-                'start'  : '2016-02-01',
-            }
-        ];
-        $scope.$parent.travel = travel;
     }
 
     $scope.addBarcodedVaccine = function () {
