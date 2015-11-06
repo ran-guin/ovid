@@ -35,7 +35,8 @@ module.exports = {
 
 			var recordModel;
 			if (sails.models[table]) {
-				console.log('Access: ' + sails.models[table]['access']);
+				console.log(table + ' Access: ' + sails.models[table]['access']);
+				console.log("MODEL: " + sails.models[table]);
 				recordModel = sails.models[table];
 			}
 
