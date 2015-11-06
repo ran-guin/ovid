@@ -8,19 +8,31 @@
 module.exports = function (req, res, next) {
   var token;
 
+  if (req.headers) {
+    console.log('HEADER: ' + JSON.stringify(req.headers) );
+  }
+  else {
+    console.log("NO HEADER in REQUEST");
+  }
+
   if (req.headers && req.headers.authorization) {
+    console.log("found authorization... ");
     var parts = req.headers.authorization.split(' ');
     if (parts.length == 2) {
       var scheme = parts[0],
         credentials = parts[1];
 
+      console.log("Test: " + scheme + " = " + credentials);
       if (/^Bearer$/i.test(scheme)) {
         token = credentials;
       }
     } else {
-      return res.json(401, {err: 'Format is Authorization: Bearer [token]'});
+      return res.json(401, {err: 'Format is authorization: Bearer [token]'});
     }
-  } else if (req.param('token')) {
+  } else if (req.headers && req.headers['x-access-token']) {
+    token = req.headers['x-access-token'];
+  }
+  else if (req.param('token')) {
     token = req.param('token');
     
     // We delete the token from param to not mess with blueprints
@@ -28,6 +40,10 @@ module.exports = function (req, res, next) {
   } else {
     return res.json(401, {err: 'No Authorization header was found'});
   }
+
+  // ... continue by verifying token received ... 
+
+  console.log("Verify token: " + token);
   
   jwToken.verifyToken(token, function (err, payload) {
     if (err) return res.json(401, {err: 'Invalid Token!'});
