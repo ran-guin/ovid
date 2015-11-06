@@ -22,6 +22,7 @@ app.controller('AppointmentController',
 
     /** run PRIOR to standard initialization  */
     $scope.setup = function (config) {
+        $scope.$parent.setup(config);
         $scope.$parent.itemClass = 'treatment';
         $scope.$parent.mainClass = 'appointment';
         
@@ -96,7 +97,7 @@ app.controller('AppointmentController',
          
         Nto1Factory.extend_Parameters($scope.Columns, $scope.itemColumns, $scope.Autocomplete);
 
-        $scope.$parent.setup(config);
+        //$scope.$parent.setup(config);
     }
 
     $scope.syncLookup = function (attribute, id, label) {
