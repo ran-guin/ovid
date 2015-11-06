@@ -5,6 +5,8 @@
 * @docs        :: http://sailsjs.org/#!documentation/models
 */
 
+var q = require('q');
+
 module.exports = {
 
   attributes: {
@@ -14,7 +16,16 @@ module.exports = {
 
     parent_region_id: {
         model: 'region'
-    }
-  }
+    },
+
+    /*** list of appliable regions ... another way of doing this generically ? */
+    applicable : {
+    	type: 'string'
+    },
+  },
+
+
+
 };
+
 

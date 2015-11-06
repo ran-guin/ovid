@@ -65,7 +65,7 @@ module.exports = {
 		type : 'query',
 		tables : ['clinic', 'appointment', 'patient', 'region'],
 		fields : [ 'clinic.name as clinic', 'clinic.id as clinic_id', 'clinic.address', 
-			'appointment.id as appointment_id', 'appointment.patient_id', 'position',
+			'appointment.id as appointment_id', 'appointment.patient', 'position',
 			'MedUser.name as Vaccinator', 'MedStaff.id as Vaccinator_id', 'DeskUser.name as BookedBy', 'MedStaff.role', 
 			'patient.id as patient_id', 'patient.firstName', 'patient.lastName', 'patient.gender', "birthdate", "FLOOR(DATEDIFF(CURDATE(), birthdate)/365) as age", "region.name as location"
 		],
@@ -73,7 +73,7 @@ module.exports = {
 		conditions: [
 			"appointment.status NOT IN ('Cancelled', 'Completed')",
 			"appointment.clinic = clinic.id",
-			"appointment.patient_id=patient.id",
+			"appointment.patient=patient.id",
 			"patient.region_id = region.id"
 		],
 		left_joins : [
@@ -106,6 +106,8 @@ module.exports = {
         .populate('vaccinator')
         .then ( function (appointmentData) {         
 
+        	if (appointmentData === undefined) { return cb(null, returnData) }
+
         	console.log("***** AD *******  : " + JSON.stringify(appointmentData));
         	var patient_id = appointmentData.patient.id;
 
@@ -121,7 +123,7 @@ module.exports = {
 	            console.log("TREATMENT: " + JSON.stringify(data.treatments));
 	            console.log("SCHEDULE: " + JSON.stringify(data.schedule));
 	            console.log("MAP: " + JSON.stringify(data.protectionMap));
-	            cb(null, returnData);
+	            return cb(null, returnData);
 	        });	
 	    });	
 	},

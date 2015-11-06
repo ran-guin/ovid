@@ -8,10 +8,10 @@
 module.exports = {
 
   attributes: {
-      patient_id: {
+      patient: {
           model: 'patient'
       },
-      region_id: {
+      region: {
           model: 'region'
       },
       start: {
