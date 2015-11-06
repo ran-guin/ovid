@@ -1,4 +1,7 @@
-table.table(ng-init="loadRecommendations(#{JSON.stringify(schedule)}); loadTravel();")
+- var init =  "loadRecommendations(" + JSON.stringify(schedule) + "); ";
+if patient && patient.id 
+  - init = init + " loadTravel(" + patient.id + ")"; 
+table.table(ng-init="#{init}")
   tr
     td &nbsp;
     td(colspan=2)
@@ -9,7 +12,7 @@ table.table(ng-init="loadRecommendations(#{JSON.stringify(schedule)}); loadTrave
     th Vaccine
     th Recommendation
     th Status
-    th Load
+    th Load {{ context }}
 
   tr.danger(ng-repeat="need in schedule")
       td {{ need.disease.name }}
@@ -38,16 +41,29 @@ table.table(ng-init="loadRecommendations(#{JSON.stringify(schedule)}); loadTrave
       h4 Travel Requirements: 
        a.btn.btn-success.btn-xs(ng-click="addTravel()" onclick="alert('Add modal to Manage travel plans')") +
   tr.active
+    td &nbsp;
     th Region
+    td Start
+    td Finish
     th Disease
     th Recommendation
     th Status
     th Load
   tr.warning(ng-repeat="itin in travel")
+    td
+      span(ng-if="itin.start < nextMonth") 
+        i.fa.fa-exclamation-triangle(style='color:red')
     td 
-      b {{itin.region}}
-    td {{itin.start}}
-    td {{itin.finish}}
+      b {{itin.region.name}} &nbsp; 
+    td {{itin.start  | date : 'MMM d, yyyy'}}
+    td {{itin.finish  | date : 'MMM d, yyyy'}}
+    td 
+      span(ng-if="itin && itin.recommendations && itin.recommendations.disease") 
+        b {{ itin.recommendations.disease.name}}
+    td 
+      span(ng-if="itin && itin.recommendations") 
+        {{ itin.recommendations.recommendation}}
+
     td 
       button.btn.btn-danger.btn-xs(ng-click="deleteTravel($index)") x
     td
