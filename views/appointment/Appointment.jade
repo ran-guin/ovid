@@ -6,7 +6,7 @@ block content
   .container(style='width:90%')
     div(ng-app="myApp")
       - var url = url
-      - var config = {User: User, patient: patient, treatments: treatments, appointment: appointment, schedule: schedule, protectionMap: protectionMap};
+      - var config = {User: User, patient: patient, clinic: clinic, treatments: treatments, appointment: appointment, schedule: schedule, protectionMap: protectionMap};
       - var init = "initialize(" + JSON.stringify(config) + ")";
 
       div(ng-controller="Nto1Controller")
@@ -54,7 +54,7 @@ block content
                           hr
                       tr
                         td
-                          b {{ clinic.name }} [ {{ clinic.id }} ]
+                          b {{ appointment.clinic.name }} [ {{ clinic.id }} ]
                       tr 
                         td {{ clinic.address }}
                           
