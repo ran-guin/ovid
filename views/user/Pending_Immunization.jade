@@ -62,7 +62,7 @@ table.table(ng-init="#{init}")
         b {{ itin.recommendations.disease.name}}
     td 
       span(ng-if="itin && itin.recommendations") 
-        {{ itin.recommendations.recommendation}}
+        b {{ itin.recommendations.recommendation}}
 
     td 
       button.btn.btn-danger.btn-xs(ng-click="deleteTravel($index)") x
