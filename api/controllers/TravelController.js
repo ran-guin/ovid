@@ -28,6 +28,7 @@ module.exports = {
 			
 			var list = regionList.split(',');
 
+			console.log('add recommendations for regions: ' + list.join(',') )
 			Recommendation.find( { region : list } )
 			.populate('disease')
 			.populate('vaccine')
