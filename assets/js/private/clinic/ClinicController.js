@@ -69,13 +69,13 @@ app.controller('ClinicController',
         ];
 
         $scope.itemColumns = [
-            { field : 'patient.id', label: 'patient_id', set: 1, mandatory : 1, hidden:1},
-            { field : 'lastName'},
-            { field : 'firstName'},
-            { field : 'identifier', set: 1},
-            { field : 'identifierType', set: 1},
-            { field : 'gender'},
-            { field : 'birthdate', type: 'date'},
+            { field : 'patient.id', table: 'patient', label: 'patient_id', set: 1, mandatory : 1, hidden:1},
+            { field : 'lastName', table: 'patient'},
+            { field : 'firstName', table: 'patient'},
+            { field : 'identifier', set: 1, table: 'patient'},
+            { field : 'identifierType', set: 1, table: 'patient'},
+            { field : 'gender', table: 'patient'},
+            { field : 'birthdate', type: 'date', table: 'patient'},
             { field : 'appointment.status', hidden: 1},
   //          { field : 'queue.position', hidden: 1},
   //         { field : 'Wait_Time', hidden: 1},
@@ -115,6 +115,7 @@ app.controller('ClinicController',
             token : $scope.token,
             show : "patient_id,lastName,firstName,gender,birthdate, identifier, identifierType",
             search : "patient_id,lastName,firstName,identifier, gender,birthdate",
+            update : "patient,clinic,position,status,staff",
             hide: 'patient_id',
             query_table : "patient",
             query_field : "patient.id as patient_id,lastName,firstName,gender,identifier, birthdate",
@@ -164,8 +165,6 @@ app.controller('ClinicController',
                 }
             }
                 
-            console.log("Include " + $scope.clinic.appointments.length + " clinic appointments");
-
             $scope.ac_options = JSON.stringify($scope.Autocomplete);
 
             $scope.$parent.manualSet = []; /* 'Request_Notes'];  /* manually reset */
@@ -176,11 +175,16 @@ app.controller('ClinicController',
 
   /********** Add Item to List of Requests **********/
     $scope.addItem = function( ) {
-        Nto1Factory.addItem( $scope.itemColumns, $scope.items, 'appointment');
+        
+        console.log('ADD ITEM TO:' + JSON.stringify($scope.include));
 
+        var index = $scope.include.appointment.length ;
 
-        var index = $scope.include.appointment.length - 1;
+        Nto1Factory.addItem( $scope.itemColumns, $scope.include['appointment'], 'appointment');
+
         console.log('added appointment to queue ' + index);
+        console.log("Added: " + JSON.stringify($scope.include.appointment[index-1]));
+
 /*
         $scope.items[index].status = 'Queued';
         $scope.items[index].arrivalTime = $scope.now;
@@ -189,6 +193,8 @@ app.controller('ClinicController',
 
         $scope.items[index].position = $scope.include.appointment.length;
 */
+    
+/*
         $scope.include['appointment'][index].status = 'Queued';
         $scope.include['appointment'][index].arrivalTime = $scope.now;
         $scope.include['appointment'][index].staff = $scope.user.id;
@@ -197,13 +203,26 @@ app.controller('ClinicController',
         $scope.include['appointment'][index].position = $scope.include.appointment.length;
 
         // $scope.items.push(add);        
-     
-        return $scope.saveItem(index, 'appointment')
+
+        return $scope.saveItem(index, 'appointment', $scope.Autocomplete.update.split(','))
+        */
+
+        var data = {};
+        data.status = 'Queued';
+        data.arrivalTime = $scope.now;
+        data.staff = $scope.user.id;
+        // data.clinic = $scope.clinic.id;
+        data.patient = $scope.include.appointment[index].patient_id;
+        data.position = $scope.include.appointment.length;
+
+        return $scope.addRecord('appointment', data)
         .then ( function () {
             // add to clinic appointments which mirrors items... 
-            $scope.$parent.clinic.appointments = $scope.include.appointment;  
+            //$scope.$parent.clinic.appointments = $scope.include.appointment;  
+            console.log('reload page');
+            $scope.loadRecord($scope.recordId);
+            console.log('reloaded ');
         });
-
     }
 
     $scope.deleteItem = function (model, index) {
@@ -223,6 +242,7 @@ app.controller('ClinicController',
     }
 
     $scope.loadRecord = function (recordId) {
+
         var fields = $scope.Fields.join(',');
         var itemfields = $scope.itemFields.join(',');
         $scope.customQuery = "Select " + fields + ',' + itemfields;
@@ -239,7 +259,7 @@ app.controller('ClinicController',
         $q.when(promise)
         .then ( function (res) {
             // $scope.loadCostCentre();
-            $scope.loadNextStatus();
+            // $scope.loadNextStatus();
             Nto1Factory.setClasses($scope.statusOptions, $scope.recordStatus); 
             console.log('apply user  ' + $scope.user);
 
