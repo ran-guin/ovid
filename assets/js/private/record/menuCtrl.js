@@ -1,6 +1,6 @@
 'use strict';
 
-var app = angular.module('myApp',['ngAnimate','ui.bootstrap']);
+var app = angular.module('myApp');
 
 app.controller('menuCtrl', ['$scope', function ($scope) {
 
