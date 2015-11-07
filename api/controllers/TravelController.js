@@ -12,14 +12,13 @@ module.exports = {
 
 		Travel.find( { patient : patient })
 		.populate('region')
-		.then ( function (regions) {
-			console.log("Get Travel Plans: " + JSON.stringify(regions));
+		.then ( function (travelPlans) {
+			console.log("Get Travel Plans: " + JSON.stringify(travelPlans));
 
-			var travelPlans = regions;
 			var regionList = '';
-			for (var i=0; i<regions.length; i++) {
-				var region = regions[i].region.id;
-				var applicable = regions[i].region.applicable || region;
+			for (var i=0; i<travelPlans.length; i++) {
+				var region = travelPlans[i].region.id;
+				var applicable = travelPlans[i].region.applicable || region;
 				if (applicable) {
 					regionList = regionList + ',' + applicable;
 				}
@@ -33,12 +32,12 @@ module.exports = {
 			.populate('disease')
 			.populate('vaccine')
 			.then (function (recomm) {
-				for (var i=0; i<regions.length; i++) {
+				for (var i=0; i<travelPlans.length; i++) {
 					for (var j=0; j<recomm.length; j++) {
 						
-						if (recomm[j].region == regions[i].region.id) {
+						if (recomm[j].region == travelPlans[i].region.id) {
 							travelPlans[i].recommendations = recomm[j];
-							console.log("added recommendations for " + regions[i].region.id);
+							console.log("added recommendations for " + travelPlans[i].region.id);
 						}
 					}
 				}
