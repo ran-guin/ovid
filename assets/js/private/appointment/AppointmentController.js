@@ -100,6 +100,11 @@ app.controller('AppointmentController',
         //$scope.$parent.setup(config);
     }
 
+    $scope.initialize = function( config ) {
+        $scope.setup(config);
+        console.log('initialize appointment');
+    }
+
     $scope.syncLookup = function (attribute, id, label) {
       console.log("sync " + attribute);
       console.log(JSON.stringify($scope[attribute]));
