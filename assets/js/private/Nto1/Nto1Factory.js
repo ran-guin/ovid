@@ -31,6 +31,8 @@ app.factory('Nto1Factory', function ($rootScope, $http) {
 
   service.highlightClass = '';
   service.highlight = {};
+
+  service.updatedModel = '';
  
   service.timediff = function (t1, t2, format) {
       var wait = moment().diff(moment(t1), 'minutes');
@@ -263,15 +265,23 @@ app.factory('Nto1Factory', function ($rootScope, $http) {
         
         console.log(JSON.stringify(Columns));
         var thisitem = {};
+        var populate = {};
+        
         for ( var index in Columns) {
             var col = Columns[index];
             var elId = col['label'] || col['field'];
             var label = col['label'] || col['field'];
+            var table = col['table'];
             var ngKey = label; // .replace(/[_ ]/,'');
 
-            thisitem[ngKey] = this[ngKey];  // initialize to existing attribute
+            if (table && scope && (table != scope) ) {
+              populate[table][ngKey] = this[ngKey];
+            }
+            else {
+              thisitem[ngKey] = this[ngKey];  // initialize to existing attribute
+            }
 
-            console.log('ELEMENT: ' + elId + ' ... was ' + thisitem[ngKey]);
+            // console.log('ELEMENT: ' + elId + ' ... was ' + thisitem[ngKey]);
 
             this[ngKey] = '';
             var el = document.getElementById(elId);
@@ -283,18 +293,31 @@ app.factory('Nto1Factory', function ($rootScope, $http) {
         }
 
         var add = {};
-        if (scope) { add[scope] = thisitem }
-        else { add = thisitem }
+        var alsoPopulate = Object.keys(populate);
+        for (var i = 0; i<alsoPopulate.length; i++) {
+          var pop = alsoPopulate[i];
+          thisitem[pop] = populate[pop];
+        }
 
-        console.log ('scope1: ' + JSON.stringify( this.include[scope] ));
-        if ( this.include[scope] == undefined ) { this.include[scope] = [] }
-        console.log ('scope2: ' + JSON.stringify( this.include[scope] ));
-        this.include[scope].push( add );
-        console.log(JSON.stringify(add));
+        console.log("Added Item: " + JSON.stringify(thisitem));
 
-        console.log('added item via service ...');
+        if (scope) { 
+          if ( this.include[scope] == undefined ) { this.include[scope] = [] }
+          add[scope] = thisitem;
+          this.include[scope].push( add[scope] );
+        }
+        else { 
+          add = thisitem;
+          this.include.push(add)
+        }
 
-        $rootScope.$broadcast("listUpdated(scope)");
+        console.log('added item via service for ' + scope);
+        
+        service.updatedModel = scope;
+
+        console.log("FACTORY INCLUDE1: " + JSON.stringify(this.include));        
+       
+        $rootScope.$broadcast("listUpdated");
         service.notePendingChange("Added Item(s)");    
   }
 
