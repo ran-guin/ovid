@@ -79,7 +79,7 @@ block content
                         b &nbsp; ( {{clinic.staff.length}} staff currently assigned to this clinic)
 
               hr
-              h3 Queue: [ {{ include.appointment.length }} ] {{ token }}
+              h3  {{ include.appointment.length }} appointment(s) in Queue:
 
               h5 Items:
               h6 {{ JSON.stringify(items) }}
@@ -107,18 +107,39 @@ block content
                     td 
                       b Status
                   tr(ng-repeat="q in include.appointment")
-                    td
+                    td(style='width:150px')
+                      span
+                        span(ng-if="q.status == 'Queued'") 
+                          span &nbsp;
+                          i.fa.fa-hourglass-start.fa-lg
+                        span(ng-if="q.status == 'Scheduled'") 
+                          span &nbsp;
+                          i.fa.fa-calendar-check-o.fa-lg
+                        span(ng-if="q.status == 'In Process'") 
+                          span &nbsp;
+                          i.fa.fa-ellipsis-h.fa-lg
+                        span(ng-if="q.status == 'Cancelled'") 
+                          span &nbsp;
+                          i.fa.fa-calendar-times-o.fa-lg
+                        span(ng-if="q.status == 'Ready'") 
+                          span &nbsp;
+                          i.fa.fa-bell.fa-lg
+                        span(ng-if="q.status == 'Completed'") 
+                          span &nbsp;
+                          i.fa.fa-check-square.fa-lg
+                        span(ng-if="q.status == 'Prioritized'") 
+                          span &nbsp;
+                          i.fa.fa-warning.fa-lg
+                      span(style='color:#ccc') &nbsp; &nbsp; | &nbsp; &nbsp;
                       button.btn.btn-danger.btn-xs(type='button' value="Delete" ng-click="deleteItem('appointment',$index)") X
                       span &nbsp;
-                      button.btn.btn-warning.btn-xs(type='button' data-toggle='modal' data-target='#editItemModal') Edit
-                      span(ng-if="q.DBstatus == 'saved'") 
-                        span &nbsp;
-                        i.fa.fa-check-circle-o.fa-lg
+                      button.btn.btn-warning.btn-xs(type='button' data-toggle='modal' data-target='#editItemModal') Edit                    
+     
                     td         
                       span {{ q.position }} 
                     td {{ q.patient.lastName }} 
                     td {{ q.patient.firstName }}
-                    td {{ q.patient.birthdate }} 
+                    td {{ q.patient.birthdate | date : 'MMM d, yyyy' }} 
                     td {{ q.patient.identifierType }} : {{ q.patient.identifier }}
                     td 
                       table(width='100%')
