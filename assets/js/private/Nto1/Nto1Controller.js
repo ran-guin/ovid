@@ -5,20 +5,6 @@ app.controller('Nto1Controller',
     function ($scope, $q, $rootScope, $http, $location, Nto1Factory) {
         console.log('loaded Nto1 Controller');
 
-    var start = new Date();
-    $scope.timestamp = start.toISOString().slice(0, 19).replace('T', ' '); 
-
-    /** timer with date + hours + minutes - automatically updates  **/
-    var update_seconds = 1;
-    setInterval (function() {
-        var now = new Date();
-        $scope.now = now;
-        $scope.timestamp = now.toISOString().slice(0, 19).replace('T', ' ');
-        $scope.created = now.toISOString().slice(0, 19).replace('T', ' ');
-
-        $scope.$apply();
-    }, update_seconds*1000);
-
    $scope.$on('parametersExtended', function () {
         console.log('extended parameters');
         $scope.Shown = Nto1Factory.Shown;
@@ -250,11 +236,15 @@ app.controller('Nto1Controller',
     });
 
 
-    $scope.$on('listUpdated', function (model) {
+    $scope.$on('listUpdated', function () {
+        
+        var model = Nto1Factory.updatedModel;
+
+        console.log("updated " + model);
+
         $scope.include[model] = Nto1Factory.include[model];
-        $scope.items = Nto1Factory.items;
-        console.log(' service updated list to ' + $scope.items.length);
-        console.log(' service updated list to ' + $scope.include[model].length);
+        $scope.items = $scope.include[model]
+        console.log(' service updated list to ' + JSON.stringify($scope.include[model]));
    });
 
     $scope.editMode = function (toggle) {
@@ -383,40 +373,81 @@ app.controller('Nto1Controller',
 
     }   
 
+    $scope.addRecord = function (model, data) {
+        var url = '/' + model;
+        var JSONdata = JSON.stringify(data);
+
+        return $http(
+            {
+                method : 'POST',
+                url : url,
+                data : JSONdata,
+                headers : { authorization : 'Bearer ' + $scope.token },
+            })
+            .then ( function (res) {
+                console.log("POSTED : " + JSONdata);      
+            }); 
+    }
+
     /********** Save Item **********/
-    $scope.saveItem = function (index, model) {
+    $scope.saveItem = function (index, model, fields) {
 
         // var keys = Object.keys($scope.items[index]);
-        var keys = Object.keys($scope.include[model][index]);
+        var keys = fields || Object.keys($scope.include[model][index]);
+        //var keys = $scope.Autocomplete.update.split(/,/);
         var data = {};
 
+        console.log("SAVE " + model + ": " + JSON.stringify($scope.include[model]));
         for (var j=0; j<keys.length; j++) {
             var key = keys[j];
-            console.log(index + " KEY: " + key + " = " + typeof $scope.include[model][index][key])
-            if ( $scope.include[model][index][key] && typeof $scope.include[model][index][key] != 'object' ) {
-                console.log("SET " + key);
-                data[key] = $scope.include[model][index][key];
+            var vType = typeof $scope.include[model][index][key];
+
+            console.log(index + " KEY: " + key + " = " + vType)
+
+            if ( $scope.include[model][index][key] && vType == 'object' ) {
+                console.log("Detected Object: " + JSON.stringify($scope.include[model][index][key]));
+                // load either object attribute or alias (eg patient.id or 'patient_id')
+                data[key] = $scope.include[model][index][key]['id'] || $scope.include[model][index][key + '_id']; 
+                console.log("SET OBJECT " + key + ' = ' + data[key]);
             }
-            else if ($scope.include[model][index][key] && $scope.include[model][index][key][key + '_id']) {
+            else if ( $scope.include[model][index][key] && typeof vType != 'object' ) {
+                data[key] = $scope.include[model][index][key];
+                console.log("SET VALUE " + key + ' = ' + data[key]);
+            }
+            else if ($scope.include[model][index][key] && $scope.include[model][index][key][key + '_id']) {                                console.log("SET OBJECT " + key);
                 data[key] = $scope.include[model][index][key][key + '_id'];
+                console.log("ONLY SET ID for " + key + ' = ' + data[key]);
             }
             else if ($scope.include[model][index][key] && $scope.include[model][index][key]['id']) {
                 data[key] = $scope.include[model][index][key]['id'];
+                console.log("USE DEFINED ID for " + key + ' = ' + data[key]);
+            }
+            else {
+                console.log(key + " not defined for " + model + ' #' + index);
             }
         }       
-
 
         var JSONdata = JSON.stringify(data);
  
         console.log(i + " SaveData: " + JSONdata);
-        console.log("model: " + model);
+        var url = '/' + model;
+        console.log("model: " + model + ' -> ' + url) ;
         //var header = { 'Authorization' : $scope.token };
 
         // update database using waterline built in functions ...  
-        return $http.post({
-            url : "/" + model, 
+        return $http({
+            method : 'POST',
+            url : url,
+            data : JSONdata,
+            headers : { authorization : 'Bearer ' + $scope.token },
+        })
+            //.post(url, JSONdata)
+/*
+        {
+            url : url, 
             data : JSONdata, 
         })
+ */
         .then ( function (res) {
             $scope.include[model][index]['DBstatus'] = 'saved';
         }); 
@@ -561,11 +592,6 @@ app.controller('Nto1Controller',
     $scope.updateRecord = function () {
         console.log('update record');
     }
-
-    $scope.addRecord = function () {
-        console.log("trigger new item");
-        $('#insideModal').html("ADD INTERNAL CONTENT");
-    }        
 
     $scope.searchItem = function() {
         console.log('search item..');
