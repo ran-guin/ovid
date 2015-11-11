@@ -66,6 +66,7 @@ app.controller('ClinicController',
             { field : 'appointment.id' },
             { field : 'user.name', label : 'deskStaff'},
             { field : 'user.id', label : 'deskStaffId', set: 1},
+            { field : 'position'},
         ];
 
         $scope.itemColumns = [
@@ -114,7 +115,7 @@ app.controller('ClinicController',
             target : 'lastName',
             token : $scope.token,
             show : "patient_id,lastName,firstName,gender,birthdate, identifier, identifierType",
-            search : "patient_id,lastName,firstName,identifier, gender,birthdate",
+            search : "patient_id,lastName,firstName,identifier,identifierType,gender,birthdate",
             update : "patient,clinic,position,status,staff",
             hide: 'patient_id',
             query_table : "patient",
@@ -183,7 +184,7 @@ app.controller('ClinicController',
         Nto1Factory.addItem( $scope.itemColumns, $scope.include['appointment'], 'appointment');
 
         console.log('added appointment to queue ' + index);
-        console.log("Added: " + JSON.stringify($scope.include.appointment[index-1]));
+        console.log("Added: " + JSON.stringify($scope.include.appointment[index]));
 
 /*
         $scope.items[index].status = 'Queued';
@@ -194,19 +195,19 @@ app.controller('ClinicController',
         $scope.items[index].position = $scope.include.appointment.length;
 */
     
-/*
-        $scope.include['appointment'][index].status = 'Queued';
-        $scope.include['appointment'][index].arrivalTime = $scope.now;
-        $scope.include['appointment'][index].staff = $scope.user.id;
-        $scope.include['appointment'][index].clinic = $scope.clinic.id;
 
-        $scope.include['appointment'][index].position = $scope.include.appointment.length;
+        $scope.$parent.include['appointment'][index].status = 'Queued';
+        $scope.$parent.include['appointment'][index].arrivalTime = $scope.now;
+        $scope.$parent.include['appointment'][index].staff = $scope.user.id;
+        $scope.$parent.include['appointment'][index].clinic = $scope.clinic.id;
+
+        $scope.$parent.include['appointment'][index].position = index+1;
 
         // $scope.items.push(add);        
+        console.log(index + " INCLUDED: " + JSON.stringify($scope.include.appointment))
 
         return $scope.saveItem(index, 'appointment', $scope.Autocomplete.update.split(','))
-        */
-
+/*
         var data = {};
         data.status = 'Queued';
         data.arrivalTime = $scope.now;
@@ -223,6 +224,7 @@ app.controller('ClinicController',
             $scope.loadRecord($scope.recordId);
             console.log('reloaded ');
         });
+ */
     }
 
     $scope.deleteItem = function (model, index) {
@@ -263,7 +265,7 @@ app.controller('ClinicController',
             Nto1Factory.setClasses($scope.statusOptions, $scope.recordStatus); 
             console.log('apply user  ' + $scope.user);
 
-            $scope.updateTotals();
+            //$scope.updateTotals();
             $scope.highlightBackground = "background-color:#9C9;";
 
         });
@@ -388,36 +390,4 @@ app.controller('ClinicController',
             });           
     }
 
-    $scope.dumpLocalScope = function () {
-        console.log("*** Dumped Local Attribute List **");
-        for (var i= 0; i<$scope.attributes.length; i++) {
-            var att = $scope.attributes[i];
-            console.log(att + ' = ' + $scope[att]);
-            if ($scope.$parent[att] && $scope.$parent[att] != $scope[att]) { console.log("** Parent  " + att + " = " + $scope.$parent[att]) }
-        }
-
-        console.log('id: ' + $scope.recordId);
-        console.log('url: ' + $scope.url + ' : ' + $scope.$parent.url);
-        console.log('config: ' + JSON.stringify($scope.config))
-        console.log('P config: ' + JSON.stringify($scope.$parent.config))
-
-        console.log("** message **");
-        console.log($scope.mainMessage);
-        console.log("** Local Items: **");
-        for (var i= 0; i<$scope.include.appointment.length; i++)  {
-            console.log(JSON.stringify($scope.include.appointment[i]))
-        }
-        console.log("** item Maps **");
-        console.log('Set: ' + JSON.stringify($scope.Set));
-        console.log('ReSet: ' + JSON.stringify($scope.Reset));
-        console.log('Map: ' + JSON.stringify($scope.Map));
-        console.log('item Set: ' + JSON.stringify($scope.itemSet));
-        console.log('item ReSet: ' + JSON.stringify($scope.itemReset));
-        console.log('item Map: ' + JSON.stringify($scope.itemMap));
-        console.log("**Local Lookups: **");
-        console.log(JSON.stringify($scope.Lookup));
-        console.log("** DB logs **");
-        console.log(JSON.stringify($scope.createdRecords));
-        console.log(JSON.stringify($scope.editedRecords));
-    }
 }]);
