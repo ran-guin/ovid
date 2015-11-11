@@ -269,37 +269,46 @@ app.factory('Nto1Factory', function ($rootScope, $http) {
         
         for ( var index in Columns) {
             var col = Columns[index];
-            var elId = col['label'] || col['field'];
-            var label = col['label'] || col['field'];
+            var fld = col['field'];
+            var elId = col['label'] || fld;
+            var label = col['label'] || fld;
             var table = col['table'];
             var ngKey = label; // .replace(/[_ ]/,'');
 
+            var regex = table + '\.';
+            fld = fld.replace(regex,'');
+
             if (table && scope && (table != scope) ) {
-              populate[table][ngKey] = this[ngKey];
+              if ( thisitem[table] === undefined ) { thisitem[table] = {} }
+              if (this[table]) {
+                // not typically used... 
+                thisitem[table][ngKey] = this[table][ngKey];
+              }
             }
             else {
               thisitem[ngKey] = this[ngKey];  // initialize to existing attribute
+              console.log("BASIC " + table + ':' + scope + " = " + JSON.stringify(this[ngKey]));
             }
-
-            // console.log('ELEMENT: ' + elId + ' ... was ' + thisitem[ngKey]);
 
             this[ngKey] = '';
             var el = document.getElementById(elId);
             if (el) { 
-                thisitem[ngKey] = el.value;
-                el.value = '';
-                console.log(ngKey + " Set to " + thisitem[ngKey])
+              if ( table && scope && (table != scope) ) {
+                // use actual field name for populated model attributes
+                thisitem[table][fld] = el.value;  
+              }
+              else {
+                // use label for standard attributes
+                thisitem[ngKey] = el.value;                
+              }
+              console.log(ngKey + " (re)Set to " + el.value)
+              el.value = '';
             }
         }
 
         var add = {};
-        var alsoPopulate = Object.keys(populate);
-        for (var i = 0; i<alsoPopulate.length; i++) {
-          var pop = alsoPopulate[i];
-          thisitem[pop] = populate[pop];
-        }
 
-        console.log("Added Item: " + JSON.stringify(thisitem));
+        console.log("Added " + scope  + ": " + JSON.stringify(thisitem));
 
         if (scope) { 
           if ( this.include[scope] == undefined ) { this.include[scope] = [] }
@@ -314,8 +323,6 @@ app.factory('Nto1Factory', function ($rootScope, $http) {
         console.log('added item via service for ' + scope);
         
         service.updatedModel = scope;
-
-        console.log("FACTORY INCLUDE1: " + JSON.stringify(this.include));        
        
         $rootScope.$broadcast("listUpdated");
         service.notePendingChange("Added Item(s)");    
