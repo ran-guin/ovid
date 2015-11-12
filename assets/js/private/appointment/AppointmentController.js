@@ -77,6 +77,7 @@ app.controller('AppointmentController',
    
         $scope.Autocomplete = {
             url : '/api/search',
+            token : $scope.token,
             view: 'appointment/Appointment',
             target : 'Vaccine',
             show : "Vaccine, Disease, Contraindications, known_side_effect, recommendation",
@@ -93,7 +94,7 @@ app.controller('AppointmentController',
             onEmpty : "No Vaccine found.<P><div class='alert alert-warning'>Please try different spellings or different field to search.<P>Please only add a new item if this item has never been received before.  <button class='btn btn-primary' type='button' data-toggle='modal' data-target='#newPatientModal'> Add New Patient </button></div>\n"
         };
 
-        console.log($scope.Autocomplete['url']);
+        console.log($scope.Autocomplete['url'] + " + " + $scope.token);
          
         Nto1Factory.extend_Parameters($scope.Columns, $scope.itemColumns, $scope.Autocomplete);
 
@@ -148,11 +149,12 @@ app.controller('AppointmentController',
 
   /********** Add Item to List of Requests **********/
     $scope.addItem = function () {
-        Nto1Factory.addItem( $scope.itemColumns, $scope.items, 'treatment' );
-        var index = $scope.items.length - 1;
-        console.log('added treatment...');
-        $scope.$parent.items[index].status = 'requested';
+        var index = $scope.include['treatment'].length;
 
+        Nto1Factory.addItem( $scope.itemColumns, $scope.include.treatment, 'treatment' );
+
+        console.log('added treatment...');
+        $scope.$parent.include['treatment'][index].status = 'requested';
     }
 
     $scope.addBarcodedVaccine = function () {
@@ -162,7 +164,7 @@ app.controller('AppointmentController',
         var ids = $scope.loadExamples(['Scanned','Scanned'],[null,null], ['Recommended','Mandatory for Region'],1);
 
         for (var i=0; i<ids.length; i++) {
-            $scope.$parent.items[i].status = 'Scanned';
+            $scope.$parent.include['treatment'][i].status = 'Scanned';
 
             var data = {
                 'status' : 'Scanned'
@@ -259,16 +261,16 @@ app.controller('AppointmentController',
             'route' : vaccine['defaultRoute'],
         };
 
-        for (var i=0; i<$scope.items.length; i++) {
-            console.log("Compare " + $scope.items[i]['Vaccine'] + ' with ' + vaccine['Vaccine']);
-            if ($scope.$parent.items[i]['Vaccine'] == vaccine['Vaccine']) {
+        for (var i=0; i<$scope.include['treatment'].length; i++) {
+            console.log("Compare " + $scope.include['treatment'][i]['Vaccine'] + ' with ' + vaccine['Vaccine']);
+            if ($scope.$parent.include['treatment'][i]['Vaccine'] == vaccine['Vaccine']) {
                 alreadyTracked = i;
             }
         }
 
         if (alreadyTracked == null) {
             console.log("Add new vaccine: " + JSON.stringify(vaccine));
-            $scope.$parent.items.push(vaccine);
+            $scope.$parent.include['treatment'].push(vaccine);
             
             console.log("Post to database (treatment): " + JSON.stringify(data));
             
@@ -277,8 +279,8 @@ app.controller('AppointmentController',
             $http.post("/treatment", JSON.stringify(data), config)
             .then ( function (response) {
                 console.log("added to database");
-                var index = $scope.items.length - 1;
-                $scope.$parent.items[index]['treatment_id'] = response['id'];
+                var index = $scope.include['treatment'].length - 1;
+                $scope.$parent.include['treatment'][index]['treatment_id'] = response['id'];
                 return index;
             });
 
@@ -288,15 +290,15 @@ app.controller('AppointmentController',
             var keys = Object.keys(vaccine);
             for (var i= 0; i<keys.length; i++) {
                 // eg.. maintain due/overdue status if scanned...
-                if (vaccine[keys[i]] == null) { vaccine[keys[i]] = $scope.items[alreadyTracked][keys[i]] }  
+                if (vaccine[keys[i]] == null) { vaccine[keys[i]] = $scope.include['treatment'][alreadyTracked][keys[i]] }  
             }
-            $scope.$parent.items[alreadyTracked] = vaccine;
+            $scope.$parent.include['treatment'][alreadyTracked] = vaccine;
  
-            var treatment_id = $scope.items[alreadyTracked]['treatment_id'];
+            var treatment_id = $scope.include['treatment'][alreadyTracked]['treatment_id'];
 
             console.log("update database (treatment) " + treatment_id + ": " + JSON.stringify(data));
             if ($scope.treatement_id) {
-                console.log("updated treatment " + $scope.items[alreadyTracked]['treatment_id'] );
+                console.log("updated treatment " + $scope.include['treatment'][alreadyTracked]['treatment_id'] );
                 $http.put("/treatment/" + treatment_id , JSON.stringify(data))
                 .then ( function (response) {
                     console.log("updated database");
@@ -353,11 +355,11 @@ app.controller('AppointmentController',
 
     }
 
-    /********** Save Request and List of Items Requested **********/
+    /********** Save Request and List of Include['treatment'] Requested **********/
     $scope.createRecord = function() {
             console.log("Post " + $scope.mainClass);
 
-            for (var i=0; i<$scope.items.length; i++) {
+            for (var i=0; i<$scope.include['treatment'].length; i++) {
 
             }
 
@@ -366,7 +368,7 @@ app.controller('AppointmentController',
                 'Queue_Creation_Date' : $scope.timestamp,
                 'FK_appointment__ID' : $scope.appointment_ID,
                 'Queue_Status' : 'Active',
-                'items' : $scope.items,
+                'items' : $scope.include['treatment'],
                 'map'   : $scope.itemSet,
             }; 
 
@@ -391,36 +393,4 @@ app.controller('AppointmentController',
             });           
     }
 
-    $scope.dumpLocalScope = function () {
-        console.log("*** Dumped Local Attribute List **");
-        for (var i= 0; i<$scope.attributes.length; i++) {
-            var att = $scope.attributes[i];
-            console.log(att + ' = ' + $scope[att]);
-            if ($scope.$parent[att] && $scope.$parent[att] != $scope[att]) { console.log("** Parent  " + att + " = " + $scope.$parent[att]) }
-        }
-
-        console.log('id: ' + $scope.recordId);
-        console.log('url: ' + $scope.url + ' : ' + $scope.$parent.url);
-        console.log('config: ' + JSON.stringify($scope.config))
-        console.log('P config: ' + JSON.stringify($scope.$parent.config))
-
-        console.log("** message **");
-        console.log($scope.mainMessage);
-        console.log("** Local Items: **");
-        for (var i= 0; i<$scope.items.length; i++)  {
-            console.log(JSON.stringify($scope.items[i]))
-        }
-        console.log("** item Maps **");
-        console.log('Set: ' + JSON.stringify($scope.Set));
-        console.log('ReSet: ' + JSON.stringify($scope.Reset));
-        console.log('Map: ' + JSON.stringify($scope.Map));
-        console.log('item Set: ' + JSON.stringify($scope.itemSet));
-        console.log('item ReSet: ' + JSON.stringify($scope.itemReset));
-        console.log('item Map: ' + JSON.stringify($scope.itemMap));
-        console.log("**Local Lookups: **");
-        console.log(JSON.stringify($scope.Lookup));
-        console.log("** DB logs **");
-        console.log(JSON.stringify($scope.createdRecords));
-        console.log(JSON.stringify($scope.editedRecords));
-    }
 }]);
