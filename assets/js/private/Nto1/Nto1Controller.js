@@ -141,8 +141,8 @@ app.controller('Nto1Controller',
         return $http.post(url, jsonData)
                 .success ( function (response) {
                         console.log("saved changes");
-                console.log(url);
-                console.log(jsonData);
+                        console.log(url);
+                        console.log(jsonData);
                 })
                 .error ( function (error) {
                         console.log("Error updating record "  + error);
@@ -372,6 +372,37 @@ app.controller('Nto1Controller',
         });
 
     }   
+
+    $scope.putRecord = function (model, id, data) {
+        if (model && id && data) {
+            var url = '/' + model + '/' + id;
+
+
+            var JSONdata = data;
+            if (typeof JSONdata == 'object' ) {
+                // not yet stringified... 
+                JSONdata = JSON.stringify('data');
+            }
+
+            return $http(
+            {
+                method : 'PUT',
+                url : url,
+                data : JSONdata,
+                headers : { authorization : 'Bearer ' + $scope.token },
+            })
+            .then ( function (res) {
+                console.log("Updated : " + model + ' : ' + id + ' => ' + JSONdata);                 
+                //$scope.createdRecords.push({ 'id' : response['Record_ID'], 'description' : response['Description']});
+    
+            }); 
+        }
+        else {
+            if (!model) { console.log("Missing model") }
+            if (!id) { console.log("Missing id") }
+            if (!data) { console.log("Missing data") }
+        }
+    }
 
     $scope.addRecord = function (model, data) {
         var url = '/' + model;
