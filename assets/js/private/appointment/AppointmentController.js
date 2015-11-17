@@ -3,8 +3,8 @@
 var app = angular.module('myApp');
 
 app.controller('AppointmentController', 
-    ['$scope', '$http', '$q', 'Nto1Factory',
-    function appointmentController ($scope, $http, $q, Nto1Factory) {
+    ['$scope', '$rootScope', '$http', '$q', 'Nto1Factory',
+    function appointmentController ($scope, $rootScope, $http, $q, Nto1Factory) {
 
     console.log('loaded appointment controller');        
     $scope.context = 'Appointment';
@@ -23,15 +23,16 @@ app.controller('AppointmentController',
     /** run PRIOR to standard initialization  */
     $scope.setup = function (config) {
         $scope.$parent.setup(config);
-        $scope.$parent.itemClass = 'treatment';
-        $scope.$parent.mainClass = 'appointment';
+
+        $rootScope.itemClass = 'treatment';
+        $rootScope.mainClass = 'appointment';
         
-        $scope.$parent.statusField = 'status';
-        $scope.$parent.statusDefault = 'In Process';
+        $rootScope.statusField = 'status';
+        $rootScope.statusDefault = 'In Process';
 
         /* Customize as Required */
 
-        $scope.$parent.statusOptions = ['Scheduled', 'Waiting', 'In Process', 'Cancelled', 'Completed'];
+        $rootScope.statusOptions = ['Scheduled', 'Waiting', 'In Process', 'Cancelled', 'Completed'];
  
         $scope.Columns = [
             { field : 'clinic.id', set: 1},
@@ -49,7 +50,7 @@ app.controller('AppointmentController',
             { field : 'vaccine.id', set: 1, mandatory : 1, hidden:1},
             { field : 'vaccine.name', label: 'Vaccine'},
             { field : 'disease.name', label: 'Disease'},
-            { field : 'treatment.id', label: 'treatment_id'},
+            { field : 'treatment.id', table: 'treatment', label: 'treatment_id'},
             { field : 'site'},
             { field : 'route'},            
             { field : 'lot'},
@@ -81,12 +82,12 @@ app.controller('AppointmentController',
             view: 'appointment/Appointment',
             target : 'Vaccine',
             show : "Vaccine, Disease, Contraindications, known_side_effect, recommendation",
-            search : "Vaccine, Disease, Contraindications, known_side_effect, recommendation, treatment_id",
+            search : "Vaccine, Disease, Contraindications, known_side_effect, recommendation",
             hide: 'id',
 
-            query_table : "(vaccine,  disease_vaccines__vaccine_diseases as DV, disease) LEFT JOIN contraindication ON contraindication.vaccine_id=vaccine.id LEFT JOIN vaccine_side_effect ON vaccine_side_effect.vaccine_id=vaccine.id LEFT JOIN side_effect ON side_effect_id=side_effect.id",
-            query_field : "disease.name as Disease, vaccine.name as Vaccine, contraindication.condition as Contraindications, side_effect.name as known_side_effect, recommendationLevel as recommendation, treatment_id",
-            query_condition : "DV.vaccine_diseases=disease.id and DV.disease_vaccines=vaccine.id",
+            query_table : "(vaccine,  protection, disease) LEFT JOIN contraindication ON contraindication.vaccine_id=vaccine.id LEFT JOIN vaccine_side_effect ON vaccine_side_effect.vaccine_id=vaccine.id LEFT JOIN side_effect ON side_effect_id=side_effect.id",
+            query_field : "disease.name as Disease, vaccine.name as Vaccine, contraindication.condition as Contraindications, side_effect.name as known_side_effect, recommendationLevel as recommendation",
+            query_condition : "protection.disease=disease.id and protection.vaccine=vaccine.id",
             
             // query : "SELECT DISTINCT User_Name,Request_Date,Item_Request_ID,Item_Category_Description,Unit_Qty,Item_Name,Item_Catalog,Vendor_ID,Vendor_Name, CASE WHEN Unit_Cost IS NULL THEN Item_Cost ELSE Unit_Cost END as Unit_Cost,Item_Request_Notes,Deliver_To, Item_Request_Notes FROM (Item, Item_Request, Request, User) JOIN Item_Category ON FK_Item_Category__ID=Item_Category_ID LEFT JOIN Vendor ON Vendor_ID=FK_Vendor__ID WHERE FK_Request__ID=Request_ID AND FKRequester_User__ID=User_ID AND FK_Item__ID=Item_ID AND Request_ID=FK_Request__ID",
             set : "Vaccine, Disease, Contraindications, known_side_effect,recommendation, treatment_id",
@@ -98,34 +99,40 @@ app.controller('AppointmentController',
          
         Nto1Factory.extend_Parameters($scope.Columns, $scope.itemColumns, $scope.Autocomplete);
 
-        //$scope.$parent.setup(config);
+        $scope.$parent.setup(config);
     }
 
     $scope.initialize = function( config ) {
-        $scope.setup(config);
-        console.log('initialize appointment');
+        console.log("appointment initialization...");
+        $q.when($scope.setup(config))
+        .then ( function () {
+            console.log('initialize appointment with ' + $scope.itemClass);
+        })
+        .then ( function () {
+            console.log('initialized appointment with ' + $scope.itemClass);
+            $scope.$parent.initialize(config);
+        })
+        .then ( function (res) {
+            $scope.ac_options = JSON.stringify($scope.Autocomplete);
+        });
     }
 
     $scope.syncLookup = function (attribute, id, label) {
       console.log("sync " + attribute);
       console.log(JSON.stringify($scope[attribute]));
-      $scope.$parent[id] = $scope[attribute]['id'];
-      $scope.$parent[label] = $scope[attribute]['label'];
+      $rootScope[id] = $scope[attribute]['id'];
+      $rootScope[label] = $scope[attribute]['label'];
     }
 
     $scope.loadRecommendations = function (data) {
         console.log('load recommendations');
-
-        $scope.$parent['recommendations'] = data;
-         console.log("got recommendations: " + JSON.stringify(data));
-  
-        /*
-        $http.get("/recommendation")
+        
+        $http.get("/recommendation" + '?token=' + $scope.token)
         .success ( function (response) {
-            $scope.$parent['recommendation'] = response;
+            $rootScope['recommendation'] = response;
             console.log("got recommendations: " + JSON.stringify(response));
         });
-        */
+        
     }
 
     $scope.loadPatientHistory = function (patient_id, attr) {
@@ -134,10 +141,10 @@ app.controller('AppointmentController',
         .success ( function (response) {
                 console.log("Retrieved History");
 
-                $scope.$parent.patient_history = response;
+                $rootScope.patient_history = response;
                 console.log("HIST: " + JSON.stringify($scope.patient_history)); 
 
-                if (attr) { $scope.$parent[attr] = response }
+                if (attr) { $rootScope[attr] = response }
             })
             .error (function (error) {
                 console.log("Error loading history");
@@ -149,12 +156,13 @@ app.controller('AppointmentController',
 
   /********** Add Item to List of Requests **********/
     $scope.addItem = function () {
+        console.log("INCLUDE: "  + $scope.itemClass + " : " + JSON.stringify($scope.include.treatment.length));
         var index = $scope.include['treatment'].length;
 
         Nto1Factory.addItem( $scope.itemColumns, $scope.include.treatment, 'treatment' );
 
         console.log('added treatment...');
-        $scope.$parent.include['treatment'][index].status = 'requested';
+        $rootScope.include['treatment'][index].status = 'requested';
     }
 
     $scope.addBarcodedVaccine = function () {
@@ -164,13 +172,11 @@ app.controller('AppointmentController',
         var ids = $scope.loadExamples(['Scanned','Scanned'],[null,null], ['Recommended','Mandatory for Region'],1);
 
         for (var i=0; i<ids.length; i++) {
-            $scope.$parent.include['treatment'][i].status = 'Scanned';
+            $rootScope.include['treatment'].push(ids[i]);
 
-            var data = {
-                'status' : 'Scanned'
-            };
+            var data = ids[i];
 
-            $http.put("/schedule/" + ids[i], JSON.stringify(data))
+            $http.put("/treatment/" + ids[i] + "?token=" + $scope.token, JSON.stringify(data))
             .then ( function (res) {
                 console.log("Updated status for  " + ids[i]);
             });
@@ -179,8 +185,8 @@ app.controller('AppointmentController',
     }
 
     $scope.loadPatient = function (id) {
-        $scope.$parent.patient = {};
-        $scope.$parent.patient.id = id;
+        $rootScope.patient = {};
+        $rootScope.patient.id = id;
     }
 
 // move to ClinicController only ... 
@@ -204,7 +210,7 @@ app.controller('AppointmentController',
 
 //        $http.get(url + '/clinic/queue')
 
-        $scope.$parent.queued = queueExample;
+        $rootScope.queued = queueExample;
     }
 
     $scope.loadScheduledVaccinations = function () {
@@ -263,14 +269,14 @@ app.controller('AppointmentController',
 
         for (var i=0; i<$scope.include['treatment'].length; i++) {
             console.log("Compare " + $scope.include['treatment'][i]['Vaccine'] + ' with ' + vaccine['Vaccine']);
-            if ($scope.$parent.include['treatment'][i]['Vaccine'] == vaccine['Vaccine']) {
+            if ($rootScope.include['treatment'][i]['Vaccine'] == vaccine['Vaccine']) {
                 alreadyTracked = i;
             }
         }
 
         if (alreadyTracked == null) {
             console.log("Add new vaccine: " + JSON.stringify(vaccine));
-            $scope.$parent.include['treatment'].push(vaccine);
+            $rootScope.include['treatment'].push(vaccine);
             
             console.log("Post to database (treatment): " + JSON.stringify(data));
             
@@ -280,7 +286,7 @@ app.controller('AppointmentController',
             .then ( function (response) {
                 console.log("added to database");
                 var index = $scope.include['treatment'].length - 1;
-                $scope.$parent.include['treatment'][index]['treatment_id'] = response['id'];
+                $rootScope.include['treatment'][index].id = response['id'];
                 return index;
             });
 
@@ -292,13 +298,13 @@ app.controller('AppointmentController',
                 // eg.. maintain due/overdue status if scanned...
                 if (vaccine[keys[i]] == null) { vaccine[keys[i]] = $scope.include['treatment'][alreadyTracked][keys[i]] }  
             }
-            $scope.$parent.include['treatment'][alreadyTracked] = vaccine;
+            $rootScope.include['treatment'][alreadyTracked] = vaccine;
  
-            var treatment_id = $scope.include['treatment'][alreadyTracked]['treatment_id'];
+            var treatment_id = $scope.include['treatment'][alreadyTracked].id;
 
             console.log("update database (treatment) " + treatment_id + ": " + JSON.stringify(data));
             if ($scope.treatement_id) {
-                console.log("updated treatment " + $scope.include['treatment'][alreadyTracked]['treatment_id'] );
+                console.log("updated treatment " + $scope.include['treatment'][alreadyTracked].id );
                 $http.put("/treatment/" + treatment_id , JSON.stringify(data))
                 .then ( function (response) {
                     console.log("updated database");
@@ -312,10 +318,10 @@ app.controller('AppointmentController',
     $scope.loadRecord = function (recordId) {
         var fields = $scope.Fields.join(',');
         var itemfields = $scope.itemFields.join(',');
-        $scope.$parent.customQuery = "Select " + fields + ',' + itemfields;
-        $scope.$parent.loadCondition = $scope.mainClass + "_ID = '" + recordId + "'";
+        $rootScope.customQuery = "Select " + fields + ',' + itemfields;
+        $rootScope.loadCondition = $scope.mainClass + "_ID = '" + recordId + "'";
 
-        $scope.$parent.customQuery += " FROM " + $scope.queryTables + " WHERE " + $scope.queryCondition + ' AND ' + $scope.loadCondition;
+        $rootScope.customQuery += " FROM " + $scope.queryTables + " WHERE " + $scope.queryCondition + ' AND ' + $scope.loadCondition;
 
         console.log($scope.customQuery);
         var url = '/api/q';
@@ -331,7 +337,7 @@ app.controller('AppointmentController',
             console.log('apply user  ' + $scope.user);
 
             $scope.updateTotals();
-            $scope.$parent.highlightBackground = "background-color:#9C9;";
+            $rootScope.highlightBackground = "background-color:#9C9;";
 
         });
 
@@ -381,13 +387,13 @@ app.controller('AppointmentController',
 
                 console.log(JSON.stringify($scope.createdRecords));
                 var created = $scope.createdRecords[$scope.createdRecords.length-1];
-                $scope.$parent.recordId = created['id'];
+                $rootScope.recordId = created['id'];
 
                 var link = "Queue #" + $scope.recordId + ' created : ' + created['description']
                 console.log('created Queue # ' + $scope.recordId);
                 
                 $scope.clearScope();
-                $scope.$parent.mainMessage = link;
+                $rootScope.mainMessage = link;
                 // $('#topMessage').html(link);
 
             });           
