@@ -6,7 +6,7 @@ div
           thead
             tr.active
               th &nbsp;
-              th Staffs
+              th Staff
               th Position
               th Status
               th Assigned
@@ -18,7 +18,7 @@ div
                   span(ng-if= "Vstaff.assignedTo != activeAppointment && Vstaff.dutyStatus == 'On Duty'")
                     button.btn.btn-success.btn-xs(type='button' ng-click="assignStaff($index, Vstaff.id)") assign
               td 
-                    b {{ Vstaff.name }} [ {{ Vstaff.id }} ]
+                    b {{ Vstaff.alias }} [ {{ Vstaff.id }} ]
               td 
                     b {{ Vstaff.role }}
               td

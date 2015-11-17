@@ -6,7 +6,7 @@ block content
   .container(style='width:90%')
     div(ng-app="myApp")
       - var url = url
-      - var config = {User: User, patient: patient, clinic: clinic, treatments: treatments, appointment: appointment, schedule: schedule, protectionMap: protectionMap};
+      - var config = {User: User, patient: patient, clinic: clinic, treatments: treatments, appointment: appointment, schedule: schedule, protectionMap: protectionMap, token: token};
       - var init = "initialize(" + JSON.stringify(config) + ")";
 
       div(ng-controller="Nto1Controller")
@@ -16,51 +16,49 @@ block content
             div#topMessage
 
             form#Queue(ng-submit="queue()")
-              table.table(width='100%')
+              table(width='100%')
                 tr
                   td.col-md-4
                     table
                       tr
+                        td(colspan=2) 
+                          code {{ timestamp }}
+                      tr
                         td 
-                          b {{ timestamp}}
-                        td
-                          a.btn.btn-warning.btn-xs(
-                              ng-click="loadPatientHistory(patient.id, 'recordData')" 
-                              data-toggle="modal" 
-                              data-target="#viewHistoryModal"
-                              ) View Patient History
-                      tr
-                        td &nbsp;
-                      tr
-                        td
-                          b Patient 
+                          b(data-toggle="tooltip" title="Currently logged in user") User: {{ user.name }}         
 
+                  td.col-md-4
+                    table
+                      tr
+                        td(colspan=2) 
+                          u Clinic: &nbsp;
+                      tr
+                        td 
+                          b {{ clinic.name }} [ {{ clinic.id }} ]
+                      tr
+                        td {{ clinic.address }}
+
+              hr(style="border-width:thick; border-color:black")
+
+              table(width='100%')
+                tr
+                  td.col-md-4
+                    table
+                      tr
                         td
-                          b {{ patient.firstName }} {{ patient.lastName }} [ {{ patient.age }} = {{ patient.ageYrs }} yr old {{ patient.gender }} ]
+                          b Patient: 
+                        td
+                          b {{ patient.firstName }} {{ patient.lastName }} [{{ patient.gender }}]
                       tr
                         td
                           b Birthdate: 
                         td 
-                          b {{ patient.birthdate | date : 'MMM d, yyyy'}}
-                      tr
-                        td(colspan=2) 
-                          hr
+                          b {{ patient.birthdate | date : 'MMM d, yyyy'}} [ {{ patient.ageYrs }} yr old ]
 
                       tr
-                        td 
-                          b(data-toggle="tooltip" title="Currently logged in user") Clinician: {{ user.name }}
-                      tr
                         td(colspan=2)
-                          hr
-                      tr
-                        td
-                          b {{ appointment.clinic.name }} [ {{ clinic.id }} ]
-                      tr 
-                        td {{ clinic.address }}
-                          
-                  td.col-md-4(align='center')
-                    div(ng-if="patient.id")
-                      include ./../user/Current_Immunization.jade
+                          div(ng-if="patient.id")
+                            include ./../user/Current_Immunization.jade
                           
                   td.col-md-4(align='right')
                     div(ng-if="patient.id")
@@ -95,7 +93,7 @@ block content
                     td History
                   tr(ng-repeat="q in items")
                     td
-                      button.btn.btn-danger.btn-xs(type='button' value="Delete" ng-click="deleteItem($index)") X
+                      button.btn.btn-danger.btn-xs(type='button' value="Delete" ng-click="deleteItem('treatment', $index)") X
                       span &nbsp;
                       span(ng-if="q.status != 'Applied'")
                         button.btn.btn-success.btn-xs(type='button' data-toggle='modal' data-target='#editImmunizationModal' ng-click="activateIndex($index)") Apply            
