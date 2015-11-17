@@ -63,6 +63,8 @@ block content
                   td.col-md-4(align='right')
                     div(ng-if="patient.id")
                       include ./../user/Pending_Immunization.jade
+                    div(ng-if="patient.id")
+                      include ./../user/Travel_Immunization.jade
 
                     div(ng-if="!patient.id")
                       // should never get here .... 
@@ -100,8 +102,8 @@ block content
                         button.btn.btn-warning.btn-xs(type='button' data-toggle='modal' data-target='#editImmunizationModal' ng-click="activateIndex($index)") Edit            
                         i.glyphicon.glyphicon-ok.navbar-right
                     td {{ q.status }}
-                    td {{ q.vaccine.name }} [ {{ q.vaccine }}]
-                    td {{ q.disease.name }} [ {{ q.disease }}]
+                    td {{ q.vaccine.name }} 
+                    td {{ q.disease.name }}
                     td {{ q.ReactionHistory }}
                     td {{ q.known_side_effect }}
                     td {{ q.Contraindications }}
