@@ -13,8 +13,14 @@ module.exports = {
   	},
         description : {
             type: 'string'
+        },
+        vaccine : {
+            model : 'vaccine'
+        },
+        occurrance : {
+            type : 'integer',
+            tooltip : 'estimated likelihood of side effect (as %)',
         }
-
   }
 };
 
