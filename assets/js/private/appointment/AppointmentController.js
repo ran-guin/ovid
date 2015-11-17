@@ -81,16 +81,16 @@ app.controller('AppointmentController',
             token : $scope.token,
             view: 'appointment/Appointment',
             target : 'Vaccine',
-            show : "Vaccine, Disease, Contraindications, known_side_effect, recommendation",
-            search : "Vaccine, Disease, Contraindications, known_side_effect, recommendation",
+            show : "Vaccine, Disease, Contraindications",
+            search : "Vaccine, Disease, Contraindications",
             hide: 'id',
 
             query_table : "(vaccine,  protection, disease) LEFT JOIN contraindication ON contraindication.vaccine_id=vaccine.id LEFT JOIN vaccine_side_effect ON vaccine_side_effect.vaccine_id=vaccine.id LEFT JOIN side_effect ON side_effect_id=side_effect.id",
-            query_field : "disease.name as Disease, vaccine.name as Vaccine, contraindication.condition as Contraindications, side_effect.name as known_side_effect, recommendationLevel as recommendation",
+            query_field : "vaccine, disease, disease.name as Disease, vaccine.name as Vaccine, contraindication.condition as Contraindications, side_effect.name as known_side_effect, recommendationLevel as recommendation",
             query_condition : "protection.disease=disease.id and protection.vaccine=vaccine.id",
             
             // query : "SELECT DISTINCT User_Name,Request_Date,Item_Request_ID,Item_Category_Description,Unit_Qty,Item_Name,Item_Catalog,Vendor_ID,Vendor_Name, CASE WHEN Unit_Cost IS NULL THEN Item_Cost ELSE Unit_Cost END as Unit_Cost,Item_Request_Notes,Deliver_To, Item_Request_Notes FROM (Item, Item_Request, Request, User) JOIN Item_Category ON FK_Item_Category__ID=Item_Category_ID LEFT JOIN Vendor ON Vendor_ID=FK_Vendor__ID WHERE FK_Request__ID=Request_ID AND FKRequester_User__ID=User_ID AND FK_Item__ID=Item_ID AND Request_ID=FK_Request__ID",
-            set : "Vaccine, Disease, Contraindications, known_side_effect,recommendation, treatment_id",
+            set : "vaccine, disease, Vaccine, Disease, Contraindications",
             // condition : "FK_Item_Category__ID IN (<Item_Category>)",
             onEmpty : "No Vaccine found.<P><div class='alert alert-warning'>Please try different spellings or different field to search.<P>Please only add a new item if this item has never been received before.  <button class='btn btn-primary' type='button' data-toggle='modal' data-target='#newPatientModal'> Add New Patient </button></div>\n"
         };
@@ -154,7 +154,7 @@ app.controller('AppointmentController',
 
     }
 
-  /********** Add Item to List of Requests **********/
+    /********** Add Item to List of Requests **********/
     $scope.addItem = function () {
         console.log("INCLUDE: "  + $scope.itemClass + " : " + JSON.stringify($scope.include.treatment.length));
         var index = $scope.include['treatment'].length;
@@ -162,7 +162,34 @@ app.controller('AppointmentController',
         Nto1Factory.addItem( $scope.itemColumns, $scope.include.treatment, 'treatment' );
 
         console.log('added treatment...');
-        $rootScope.include['treatment'][index].status = 'requested';
+        $rootScope.include['treatment'][index].status = 'Requested';
+
+        $scope.postAdd('treatment', index);  // show past reactions ... 
+    }
+
+    $scope.postAdd = function (model, index, vaccine) {
+
+        var vaccine_id = $scope.include[model][index].vaccine;
+        console.log("load history of reactions to " + model + ' with ' + vaccine_id);
+/*
+        $http.get('/vaccine/side_effects/' + vaccine_id)
+        .success ( function (response) {
+                console.log("Retrieved History");
+
+                $rootScope.patient_history = response;
+                console.log("HIST: " + JSON.stringify($scope.patient_history)); 
+
+                if (attr) { $rootScope[attr] = response }
+            })
+            .error (function (error) {
+                console.log("Error loading history");
+                console.log(error);
+            });
+*/
+
+        $scope.include[model][index].ReactionHistory = 'Past History..';
+        $scope.include[model][index].Contraindications = 'Pregnant Women';
+        $scope.include[model][index].known_side_effect = 'Nausea';
     }
 
     $scope.addBarcodedVaccine = function () {
@@ -171,15 +198,19 @@ app.controller('AppointmentController',
 
         var ids = $scope.loadExamples(['Scanned','Scanned'],[null,null], ['Recommended','Mandatory for Region'],1);
 
+        $scope.scanned_barcode = "AWG12312ABsadfajkl";
+
         for (var i=0; i<ids.length; i++) {
             $rootScope.include['treatment'].push(ids[i]);
 
             var data = ids[i];
-
+/*
             $http.put("/treatment/" + ids[i] + "?token=" + $scope.token, JSON.stringify(data))
             .then ( function (res) {
                 console.log("Updated status for  " + ids[i]);
             });
+*/
+            console.log("Data: " + JSON.stringify(data));
         }
  
     }
@@ -230,13 +261,14 @@ app.controller('AppointmentController',
             'known_side_effect' : "Nausea",
              'due' : due[0],
             'recommendation' : recommendation[0],
-            'vaccine_id' : 24,
+            'vaccine' : 24,
             'status' : status[0],
             'appointment_id' : $scope.appointment_id, 
             'defaultRoute' : 'IM - Intramuscular',
-        };
+            'patient' : $scope.patient.id,
+       };
         
-        ids.push( $scope.applyVaccine(example1, replace) );
+        //ids.push( $scope.applyVaccine(example1, replace) );
 
         var example2 = {
             'Disease' : 'Yellow Fever',
@@ -245,15 +277,16 @@ app.controller('AppointmentController',
             'Contraindications' : 'Pregnancy',
             'due' : due[1],
             'recommendation' : recommendation[1],
-            'vaccine_id' : 28,
+            'vaccine' : 28,
             'status' : status[1],
             'appointment_id' : $scope.appointment_id,
             'defaultRoute' : 'IM - Intramuscular',
+            'patient' : $scope.patient.id,
         };
 
 
-        ids.push( $scope.applyVaccine(example2, replace) );
-        return ids;
+        //ids.push( $scope.applyVaccine(example2, replace) );
+        return [example1, example2];
     }
 
     $scope.applyVaccine = function (vaccine, replace) {
@@ -261,10 +294,11 @@ app.controller('AppointmentController',
         var alreadyTracked = null;
 
         var data = {
-            'vaccine_id' : vaccine['vaccine_id'],
+            'vaccine' : vaccine['vaccine_id'],
             'status' : vaccine['status'],
-            'appointment_id' : vaccine['appointment_id'],
+            'appointment' : vaccine['appointment_id'],
             'route' : vaccine['defaultRoute'],
+            'patient' : vaccine['patient'],
         };
 
         for (var i=0; i<$scope.include['treatment'].length; i++) {
