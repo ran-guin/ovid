@@ -263,7 +263,6 @@ app.factory('Nto1Factory', function ($rootScope, $http) {
         // var Columns = JSON.parse(columnData);
         var Columns = columnData;
         
-        console.log(JSON.stringify(Columns));
         var thisitem = {};
         var populate = {};
         
@@ -287,7 +286,6 @@ app.factory('Nto1Factory', function ($rootScope, $http) {
             }
             else {
               thisitem[ngKey] = this[ngKey];  // initialize to existing attribute
-              console.log("BASIC " + table + ':' + scope + " = " + JSON.stringify(this[ngKey]));
             }
 
             this[ngKey] = '';
