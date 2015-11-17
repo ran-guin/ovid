@@ -86,10 +86,9 @@ block content
                     td Status
                     td Vaccine
                     td Disease
-                    td Reaction
+                    td Past Reactions
                     td Side Effects
                     td Contraindications
-                    td Recommendation
                     td History
                   tr(ng-repeat="q in items")
                     td
@@ -101,18 +100,11 @@ block content
                         button.btn.btn-warning.btn-xs(type='button' data-toggle='modal' data-target='#editImmunizationModal' ng-click="activateIndex($index)") Edit            
                         i.glyphicon.glyphicon-ok.navbar-right
                     td {{ q.status }}
-                    td {{ q.Vaccine }}
-                    td {{ q.Disease }}
-                    td 
-                      div(ng-if="q.reactions") 
-                        i.fa.fa-warning
-                      div(ng-if="q.status == 'Applied' && !q.reactions")
-                        span no
-                      div(ng-if="q.status != 'Applied'")
-                        span &nbsp;
+                    td {{ q.Vaccine }} [ {{ q.vaccine }}]
+                    td {{ q.Disease }} [ {{ q.disease }}]
+                    td {{ q.ReactionHistory }}
                     td {{ q.known_side_effect }}
                     td {{ q.Contraindications }}
-                    td {{ q.recommendation }}
                     td 
                       a.btn.btn-warning.btn-xs(
 
@@ -132,7 +124,7 @@ block content
                     span &nbsp;
                     button.btn.btn-primary.btn-xs(type='button' ng-click="addBarcodedVaccine()") Add Vaccine(s) &nbsp;
                   
-                  input.form-control(type='text' placeholder='-- Scan Vaccine Barcode(s) Here --')
+                  input.form-control(type='text' ng-model='scanned_barcode' placeholder='-- Scan Vaccine Barcode(s) Here --')
 
             include ./../Nto1/smartSearch.jade
             div 
