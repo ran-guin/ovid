@@ -7,54 +7,54 @@ app.controller('Nto1Controller',
 
    $scope.$on('parametersExtended', function () {
         console.log('extended parameters');
-        $scope.Shown = Nto1Factory.Shown;
-        $scope.SearchOn = Nto1Factory.SearchOn;
-        $scope.Hidden  = Nto1Factory.Hidden;
-        $scope.Autocomplete   = Nto1Factory.Autocomplete;
+        $rootScope.Shown = Nto1Factory.Shown;
+        $rootScope.SearchOn = Nto1Factory.SearchOn;
+        $rootScope.Hidden  = Nto1Factory.Hidden;
+        $rootScope.Autocomplete   = Nto1Factory.Autocomplete;
 
-        $scope.attributes = Nto1Factory.attributes;
-        $scope.Reset = Nto1Factory.Reset;
-        $scope.Map = Nto1Factory.Map;
-        $scope.Type = Nto1Factory.Type;
-        $scope.Set = Nto1Factory.Set;
+        $rootScope.attributes = Nto1Factory.attributes;
+        $rootScope.Reset = Nto1Factory.Reset;
+        $rootScope.Map = Nto1Factory.Map;
+        $rootScope.Type = Nto1Factory.Type;
+        $rootScope.Set = Nto1Factory.Set;
 
-        $scope.Fields = Nto1Factory.Fields;
-        $scope.itemFields = Nto1Factory.itemFields;
+        $rootScope.Fields = Nto1Factory.Fields;
+        $rootScope.itemFields = Nto1Factory.itemFields;
 
-        $scope.item_attributes = Nto1Factory.item_attributes;
-        $scope.itemReset = Nto1Factory.itemReset;
-        $scope.itemMap = Nto1Factory.itemMap;
-        $scope.itemSet = Nto1Factory.itemSet;
+        $rootScope.item_attributes = Nto1Factory.item_attributes;
+        $rootScope.itemReset = Nto1Factory.itemReset;
+        $rootScope.itemMap = Nto1Factory.itemMap;
+        $rootScope.itemSet = Nto1Factory.itemSet;
 
         console.log('extended Column & Autocomplete info');
     });
 
    $scope.$on('setClasses', function () {
         console.log('set Classes');
-        $scope.highlightOn = Nto1Factory.highlight;
-        $scope.highlightClass = Nto1Factory.highlightClass;
+        $rootScope.highlightOn = Nto1Factory.highlight;
+        $rootScope.highlightClass = Nto1Factory.highlightClass;
 
         console.log($scope.highlightOn);
         for (var status in $scope.highlightOn) {
             status = status.replace(/\s/g,'');
-            $scope[status + 'Class'] = $scope.highlightOn[status];
+            $rootScope[status + 'Class'] = $scope.highlightOn[status];
             console.log(status + ' = ' + $scope[status + 'Class']);   
         }
    });
 
-    $scope.pendingChanges = [];
+    $rootScope.pendingChanges = [];
 
-    $scope.config = {};
+    $rootScope.config = {};
 
-    $scope.saved = {};
+    $rootScope.saved = {};
 
     $scope.reloadConfig = function () {
         if ($scope.config) {
-            $scope.url = $scope.config['url'] ;
-            $scope.token = $scope.config['token'];
-            $scope.userid = $scope.config['userid'];
-            $scope.user = $scope.config['user'];
-            $scope.recordId = $scope.config['recordId'];
+            $rootScope.url = $scope.config['url'] ;
+            $rootScope.token = $scope.config['token'];
+            $rootScope.userid = $scope.config['userid'];
+            $rootScope.user = $scope.config['user'];
+            $rootScope.recordId = $scope.config['recordId'];
             console.log('reloaded config: ' + $scope.url + ' : ' + $scope.user +  ' -> ' + $scope.token);
         }
     }
@@ -63,7 +63,7 @@ app.controller('Nto1Controller',
         console.log('generic setup');
         console.log("SETUP CONFIG: " + JSON.stringify(config));
         if (config) {
-            $scope.config = config; // JSON.parse(config);           
+            $rootScope.config = config; // JSON.parse(config);           
         }
         
         $scope.reloadConfig();
@@ -71,24 +71,34 @@ app.controller('Nto1Controller',
 
         /********** Initialize **********/
     $scope.initialize = function(config) {
-        $scope.debugMode = 0;
+        $rootScope.debugMode = 0;
 
         /* DemoSevice extends above specs into more attributes: Map Set, attributes, itemMap, itemReset, item_attributes  */
        
-        console.log("Initializing...");
+        console.log("Initializing..." + $scope.itemClass);
 
-        $scope.items = [];
-        $scope.include = {};
-        $scope.activeIndex = 0;
+        $rootScope.items = [];
+        $rootScopeinclude = {};
+
+        $rootScope.include = {};
+        if ($scope.itemClass) {
+             $rootScope.include[$scope.itemClass] = [];
+             $rootScope.genarray = [];
+             console.log("EMPTY INCLUDE ITEM " + $scope.itemClass) ;
+             console.log("TEST GENARRAY " + $scope.genarray.length);
+             console.log("LENGTH = " + $scope.include[$scope.itemClass].length);
+        }      
+        console.log("setup include object...");
+        $rootScope.activeIndex = 0;
 
             
         console.log("** config:" + JSON.stringify(config));
         // $scope.username = $rootScope.getUsername();
-        $scope.username = config['user'];
+        $rootScope.username = config['user'];
     
-        $scope.submitted = [];
-        $scope.createdRecords = [];
-        $scope.editedRecords = [];
+        $rootScope.submitted = [];
+        $rootScope.createdRecords = [];
+        $rootScope.editedRecords = [];
 
         /** Initialize smartSearch options **/
         return; 
@@ -105,7 +115,7 @@ app.controller('Nto1Controller',
 
     $scope.activateIndex = function (index) {
         console.log('set active index to ' + index);
-        $scope.activeIndex = index || 0;
+        $rootScope.activeIndex = index || 0;
     }
 
     $scope.cloneRecord = function () {
@@ -122,7 +132,7 @@ app.controller('Nto1Controller',
             .success ( function (response) {
                 console.log("Posted successfully");
 
-                $scope.createdRecords.push({ 'id' : response['Record_ID'], 'description' : response['Description']});
+                $rootScope.createdRecords.push({ 'id' : response['Record_ID'], 'description' : response['Description']});
             })
             .error (function (error) {
                 console.log("Error saving record");
@@ -159,7 +169,7 @@ app.controller('Nto1Controller',
                 var recordDescription = response['Description'];
                 var link = "<div class='alert alert-warning'><A href ='/record/Item/" + itemId + "?format=html'> New Item #" + itemId + ' - ' + recordDescription + "</A></div>\n";
                 
-                $scope.itemId = itemId;
+                $rootScope.itemId = itemId;
 
                 $('#topMessage').html(link);
                 $('#newItemModal').modal('hide');
@@ -178,17 +188,17 @@ app.controller('Nto1Controller',
     $scope.toggleDebugMode = function() {
         console.log('toggle Debug Mode');
         if ($scope.debugMode) {
-            $scope.debugMode = 0;
+            $rootScope.debugMode = 0;
             console.log('toggle debug mode OFF');
         }
         else {
             console.log('toggle debug mode ON');
-            $scope.debugMode = 1;
+            $rootScope.debugMode = 1;
         }
     }
 
     /** Generate hash to stoer lookup tables **/
-    $scope.Lookup = {};
+    $rootScope.Lookup = {};
 
     $scope.loadLookup = function (url, table, model, def, condition, index) {
         /* Requirements: jquery, lodash, angular, + initialize model as array in controller */
@@ -200,7 +210,7 @@ app.controller('Nto1Controller',
             console.log('already loaded ' + table);
         }
         else {
-            $scope[model] = {};
+            $rootScope[model] = {};
 
             Nto1Factory.loadLookup(url, table, model, def);
         }
@@ -208,7 +218,7 @@ app.controller('Nto1Controller',
         if (index != undefined) { 
             var xModel = model || table;
             xModel +=  index;
-            $scope[xModel] = {};
+            $rootScope[xModel] = {};
             console.log('SET ' + xModel);
         }
     }
@@ -217,20 +227,20 @@ app.controller('Nto1Controller',
         var table = args['table'];
         var model = args['model'];
 
-        $scope.Routes = {}; 
+        $rootScope.Routes = {}; 
 
         var m = model.replace(/^.*\./,'');
         // .replace(/^.*\./,'');;
         
         console.log('synced ' + table + ' Lookup : ' + model);
-        $scope.Lookup[m] = Nto1Factory.Lookup[table];
+        $rootScope.Lookup[m] = Nto1Factory.Lookup[table];
 
         var def = Nto1Factory.Lookup[table]['value'];
         console.log('default = ' + JSON.stringify(def));
   
         if (def != undefined) {
             console.log('Set default ' + model + ' to ' + JSON.stringify(def));
-            $scope[model] = def;
+            $rootScope[model] = def;
         }
         console.log(table + ' lookup ' + model + ' = ' + JSON.stringify($scope.Lookup[model]));
     });
@@ -242,17 +252,17 @@ app.controller('Nto1Controller',
 
         console.log("updated " + model);
 
-        $scope.include[model] = Nto1Factory.include[model];
-        $scope.items = $scope.include[model]
+        $rootScope.include[model] = Nto1Factory.include[model];
+        $rootScope.items = $scope.include[model]
         console.log(' service updated list to ' + JSON.stringify($scope.include[model]));
    });
 
     $scope.editMode = function (toggle) {
         if (toggle) {
-            if ($scope.uiMode == 'Edit' ) { $scope.uiMode = '' }
-            else { $scope.uiMode = 'Edit' }
+            if ($scope.uiMode == 'Edit' ) { $rootScope.uiMode = '' }
+            else { $rootScope.uiMode = 'Edit' }
         }
-        else { $scope.uiMode = 'Edit' }
+        else { $rootScope.uiMode = 'Edit' }
 
     }
 
@@ -301,7 +311,7 @@ app.controller('Nto1Controller',
         console.log('load Record: ' + recordId);
         var recordData = [];
 
-        var includeClass = $scope.includeClass;
+        var itemClass = $scope.itemClass;
 
         if (!urlRequest || !recordId) { console.log("Error loading record without url and recordID"); return $q.when(null) }
         
@@ -317,9 +327,9 @@ app.controller('Nto1Controller',
             
             $scope.reloadConfig();
 
-            $scope.items = [];  
+            $rootScope.items = [];  
             
-            if (! $scope.include[includeClass]) { $scope.include[includeClass] = [] }
+            if (! $scope.include[itemClass]) { $rootScope.include[itemClass] = [] }
 
             for (var i=0; i<recordData.length; i++) {
                  if (i == 0) {
@@ -329,9 +339,9 @@ app.controller('Nto1Controller',
                         if ( (type == 'date') && recordData[0][att]) {
                             var stamp = recordData[0][att];
                             console.log('get ' + att + ' date from ' + stamp);
-                            $scope[att] = recordData[0][att].substring(0,10);
+                            $rootScope[att] = recordData[0][att].substring(0,10);
                         }
-                        else { $scope[att] = recordData[0][att] }
+                        else { $rootScope[att] = recordData[0][att] }
             
                         console.log(att + " = " + $scope[att]);
                      }
@@ -353,16 +363,16 @@ app.controller('Nto1Controller',
                  thisitem['Total'] = thisitem['Cost'] * thisitem['Qty'];
                  thisitem['saved'] = 1;
 
-                 $scope.items.push(thisitem);
-                $scope.include[includeClass].push(thisitem);
+                 $rootScope.items.push(thisitem);
+                $rootScope.include[itemClass].push(thisitem);
 
 
-                 $scope.pendingChanges = [];
+                 $rootScope.pendingChanges = [];
                  console.log('added item ' + i + ':' + JSON.stringify(thisitem));
                  console.log($scope.items.length + "Total items added");
-                 console.log($scope.include[includeClass].length + "Total items added");
+                 console.log($scope.include[itemClass].length + "Total items added");
             }
-            console.log($scope.include[includeClass].length + "Total items added");
+            console.log($scope.include[itemClass].length + "Total items added");
             console.log($scope.items.length + "Total items added");
 
         })
@@ -379,10 +389,12 @@ app.controller('Nto1Controller',
 
 
             var JSONdata = data;
-            if (typeof JSONdata == 'object' ) {
+            if (typeof JSONdata != 'string' ) {
                 // not yet stringified... 
-                JSONdata = JSON.stringify('data');
+                console.log('stringify object');
+                JSONdata = JSON.stringify(data);
             }
+            else { console.log("using original string") }
 
             return $http(
             {
@@ -402,6 +414,27 @@ app.controller('Nto1Controller',
             if (!id) { console.log("Missing id") }
             if (!data) { console.log("Missing data") }
         }
+    }
+
+    $scope.deleteRecord = function (model, id) {
+       if (model && id) {
+            var url = '/' + model + '/' + id;
+
+            return $http(
+            {
+                method : 'DELETE',
+                url : url,
+                headers : { authorization : 'Bearer ' + $scope.token },
+            })
+            .then ( function (res) {
+                console.log("Deleted : " + model + ' : ' + id );                 
+                //$scope.createdRecords.push({ 'id' : response['Record_ID'], 'description' : response['Description']});
+            }); 
+        }
+        else {
+            if (!model) { console.log("Missing model") }
+            if (!id) { console.log("Missing id") }
+        }        
     }
 
     $scope.addRecord = function (model, data) {
@@ -462,7 +495,7 @@ app.controller('Nto1Controller',
  
         console.log(i + " SaveData: " + JSONdata);
         var url = '/' + model;
-        console.log("model: " + model + ' -> ' + url) ;
+        console.log('model: ' + model + ' -> ' + url) ;
         //var header = { 'Authorization' : $scope.token };
 
         // update database using waterline built in functions ...  
@@ -479,30 +512,36 @@ app.controller('Nto1Controller',
             data : JSONdata, 
         })
  */
-        .then ( function (res) {
-            $scope.include[model][index]['DBstatus'] = 'saved';
+        .success ( function (res) {
+            $rootScope.include[model][index]['DBstatus'] = 'saved';
+            console.log("Saved item: " + JSON.stringify(res));
         }); 
     }
 
     /********** Delete Item **********/
     $scope.deleteItem = function (model, index) {
 
-        if (! model) { model = $scope.includeClass }
+        if (! model) { model = $scope.itemClass }
 
-        console.log('Remove ' + model + ' : ' + index );
-        console.log("initial length: " + $scope.include[model].length);
-        $scope.include[model].splice(index, 1); 
-        $scope.notePendingChange("Deleted Item(s) " + index);    
-        console.log("new length: " + $scope.include[model].length);
+        console.log('delete ' + model + ' ' + index);
+        var id = $scope.include[model][index].id;
+
+        $rootScope.include[model].splice(index, 1);
+
+        if (id) { $scope.deleteRecord(model, id) }
+        else { console.log("Error : ID not found for " + model + ' #' + index) }
+
+        $scope.notePendingChange("Deleted Item(s) " + index);  
+
    }
         
     $scope.notePendingChange = function (message) {
-        $scope.pendingChanges.push(message);
+        $rootScope.pendingChanges.push(message);
         console.log("noted pending change: " + message);
     }
     
     $scope.notePendingChange = function (message) {
-        $scope.pendingChanges.push(message);
+        $rootScope.pendingChanges.push(message);
         console.log("noted pending change: " + message);    
     }
    
@@ -510,17 +549,17 @@ app.controller('Nto1Controller',
         for (var i=0; $i < $scope.item_attributes.length; i++) {
             var att = $scope.item_attributes[i];
             var searchElement = 'item' + att;
-            $scope[searchElement] = '';
+            $rootScope[searchElement] = '';
         }
     }
 
     $scope.clearScope = function (model) {
-        $scope.items = [];
-        $scope.include[model] = [];
+        $rootScope.items = [];
+        $rootScope.include[model] = [];
 
         for (var i=0; i < $scope.attributes.length; i++) {
             var att = $scope.attributes[i];
-            $scope[att] = '';
+            $rootScope[att] = '';
         }
         
         console.log('cleared record');
@@ -540,8 +579,8 @@ app.controller('Nto1Controller',
 
         $scope.reloadConfig();
 
-        $scope.recordId = '';
-        $scope.mainMessage = '';
+        $rootScope.recordId = '';
+        $rootScope.mainMessage = '';
         var msgElement = document.getElementById('message');
         if (msgElement) { console.log('clear message'); msgElement.value = '' }
         else { console.log('no message') }
@@ -554,13 +593,13 @@ app.controller('Nto1Controller',
     $scope.inheritItemAttribute = function (index, atts, errMsg) {
         
         var conflicts = [];
-        var model  = $scope.includeClass;
+        var model  = $scope.itemClass;
 
         for (var i=0; i<atts.length; i++) {
             var att = atts[i];
             var current = $scope[att];
             if (current == undefined) {
-                $scope[att] = $scope.include[model][index][att];
+                $rootScope[att] = $scope.include[model][index][att];
                 console.log('set ' + att + ' to ' + $scope[att]);
             }
             else if (current == $scope.include[model][index][att]) {
@@ -580,7 +619,7 @@ app.controller('Nto1Controller',
 
     $scope.loadNextStatus = function(newStatus) {
         console.log('determine next status level');
-        if (newStatus) { $scope.nextStatus = newStatus }
+        if (newStatus) { $rootScope.nextStatus = newStatus }
         else {
             console.log("check " + $scope.statusOptions.length + " status options");
             for (var i=0; i<$scope.statusOptions.length; i++) {
@@ -588,7 +627,7 @@ app.controller('Nto1Controller',
                 var nextStatus = $scope.statusOptions[i+1];
                 console.log('compare ' + $scope.recordStatus + " with " + thisStatus);
                 if ($scope.recordStatus == thisStatus) { 
-                    $scope.nextStatus = nextStatus;
+                    $rootScope.nextStatus = nextStatus;
                     console.log('next status level = ' + $scope.nextStatus);
                     break;
                 }
@@ -599,7 +638,7 @@ app.controller('Nto1Controller',
     /** Standards **/
 
     /** default lookup menu settings **/
-    $scope.MenuSettings = {
+    $rootScope.MenuSettings = {
         closeOnSelect: true,
         selectionLimit: 1,
         enableSearch: true,
@@ -614,8 +653,8 @@ app.controller('Nto1Controller',
 
     /** syncronize lookup id / label with attribute **/
     $scope.syncLookup = function (attribute, id, label) {
-        $scope[id] = $scope[attribute]['id'];
-        $scope[label] = $scope[attribute]['label'];
+        $rootScope[id] = $scope[attribute]['id'];
+        $rootScope[label] = $scope[attribute]['label'];
         console.log("synced " + attribute + ' -> ' + $scope[id] + " = " + $scope[label]);
     }
 
