@@ -47,9 +47,10 @@ app.controller('AppointmentController',
         ];
 
         $scope.itemColumns = [
-            { field : 'vaccine.id', set: 1, mandatory : 1, hidden:1},
-            { field : 'vaccine.name', label: 'Vaccine'},
-            { field : 'disease.name', label: 'Disease'},
+            { field : 'vaccine.id', table: 'vaccine', label: 'vaccine', set: 1, mandatory : 1, hidden:1},
+            { field : 'vaccine.name', table: 'vaccine', label: 'Vaccine'},
+            { field : 'disease.id', table: 'disease', label: 'disease', set: 1, mandatory : 1, hidden:1},
+            { field : 'disease.name', table: 'disease', label: 'Disease'},
             { field : 'treatment.id', table: 'treatment', label: 'treatment_id'},
             { field : 'site'},
             { field : 'route'},            
@@ -86,7 +87,7 @@ app.controller('AppointmentController',
             hide: 'id',
 
             query_table : "(vaccine,  protection, disease) LEFT JOIN contraindication ON contraindication.vaccine_id=vaccine.id LEFT JOIN vaccine_side_effect ON vaccine_side_effect.vaccine_id=vaccine.id LEFT JOIN side_effect ON side_effect_id=side_effect.id",
-            query_field : "vaccine, disease, disease.name as Disease, vaccine.name as Vaccine, contraindication.condition as Contraindications, side_effect.name as known_side_effect, recommendationLevel as recommendation",
+            query_field : "vaccine.id as vaccine, disease, disease.name as Disease, vaccine.name as Vaccine, contraindication.condition as Contraindications, side_effect.name as known_side_effect, recommendationLevel as recommendation",
             query_condition : "protection.disease=disease.id and protection.vaccine=vaccine.id",
             
             // query : "SELECT DISTINCT User_Name,Request_Date,Item_Request_ID,Item_Category_Description,Unit_Qty,Item_Name,Item_Catalog,Vendor_ID,Vendor_Name, CASE WHEN Unit_Cost IS NULL THEN Item_Cost ELSE Unit_Cost END as Unit_Cost,Item_Request_Notes,Deliver_To, Item_Request_Notes FROM (Item, Item_Request, Request, User) JOIN Item_Category ON FK_Item_Category__ID=Item_Category_ID LEFT JOIN Vendor ON Vendor_ID=FK_Vendor__ID WHERE FK_Request__ID=Request_ID AND FKRequester_User__ID=User_ID AND FK_Item__ID=Item_ID AND Request_ID=FK_Request__ID",
@@ -103,6 +104,7 @@ app.controller('AppointmentController',
     }
 
     $scope.initialize = function( config ) {
+        
         console.log("appointment initialization...");
         $q.when($scope.setup(config))
         .then ( function () {
