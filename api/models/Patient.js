@@ -78,6 +78,7 @@ module.exports = {
     if (input.patient) {conditions.id = input.patient }
 
     Patient.findOne( conditions )
+    .populate('region')
     .then ( function (patientData) {
       
       var age = moment().diff(moment(patientData.birthdate), 'years');

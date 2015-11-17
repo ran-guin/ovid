@@ -96,18 +96,13 @@ module.exports = {
       var clinic_id = input['clinic_id'] || 2;
 
       Clinic.findOne( { id : clinic_id} )
-      .then ( function (clinicData) {
-        console.log("CLINIC INFO: " + JSON.stringify(clinicData));
-        // if (err) { console.log("ERR IN clninic query..."); return cb(err); }
- 
+      .then ( function (clinicData) { 
         var info = {};
  
         if (clinicData) {
 
           info = clinicData || {};
           
-          console.log("Include: " + JSON.stringify(input));
-
           if (input['include'] ) {
             Q.all([
               Clinic.getAppointments(clinicData.id),
@@ -116,7 +111,8 @@ module.exports = {
             .then ( function (result) {
                 info['appointments'] = result[0];
                 info['staff'] = result[1];
-               return cb(null, info);
+                console.log("** CLINIC loaded: **\n" + JSON.stringify(info));
+                return cb(null, info);
             })
             .catch( function (err) {
               return cb(err);
@@ -142,16 +138,18 @@ module.exports = {
   },
 
   getStaff: function (clinic_id) {
+    console.log("load Staff for clinic " + clinic_id);
 
-    return Clinic_staff.find({ clinic : clinic_id }).populate('staff')
+    return Clinic_staff.find({ clinic : clinic_id })
+    .populate('staff')
     .then ( function ( staffData ) {  
-        console.log("checking for staff..."); 
-
-        return Record.join_data({ join : staffData, to : 'staff'});
+        var joined = Record.join_data({ join : staffData, to : 'staff', map : { 'id' : 'clininc_staff_id'} } );
+        console.log("** Clinic Staff Data: **\n" + JSON.stringify(joined));
+        return joined;
     })
     .catch ( function (err) {
-      console.log("Errors: " + err);
-      return;
+        console.log("get Staff Errors: " + err);
+        return;
     });
   },
 
@@ -164,16 +162,18 @@ module.exports = {
     .populate('vaccinator')
     .populate('patient')
     .then ( function ( appointmentData ) {  
-        console.log("checking for appointments...");        
-
         if (appointmentData) {
-          console.log("Appointment Data: " + JSON.stringify(appointmentData));
+          console.log("** Clinic Appointment Data: **\n" + JSON.stringify(appointmentData));
           return appointmentData;
         }
         else {
           console.log('no Appointments');
           return [];
         }
+    })
+    .catch ( function (err) {
+        console.log("get Staff Errors: " + err);
+        return;  
     });
   }
 
