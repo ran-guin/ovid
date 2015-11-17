@@ -23,9 +23,10 @@ block content
                 a(href="#profile" aria-controls="profile" role="tab" data-toggle="tab") Profile
               li.active(role="presentation")
                 a(href="#Protection" aria-controls="Protection" role="tab" data-toggle="tab") Protection
-              li(role="scheduled")
-                a(href="#scheduled" aria-controls="scheduled" role="tab" data-toggle="tab") Required
-
+              li(role="required")
+                a(href="#required" aria-controls="required" role="tab" data-toggle="tab") Required
+              li(role="travel")
+                a(href="#travel" aria-controls="travel" role="tab" data-toggle="tab") Travel
             <!-- Tab panes -->
             div.tab-content
               div.tab-pane#profile(role="tabpanel")
@@ -46,8 +47,11 @@ block content
                 h3 Current Protection:
                 include Current_Immunization.jade
 
-              div.tab-pane#scheduled(role="tabpanel")
+              div.tab-pane#required(role="tabpanel")
                 include Pending_Immunization.jade
+
+              div.tab-pane#required(role="tabpanel")
+                include Travel_Immunization.jade
 
           if ! User
             h3 no User defined... 
