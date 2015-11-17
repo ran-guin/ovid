@@ -68,7 +68,6 @@ module.exports = {
 
           payload['token'] = jwToken.issueToken(payload); 
           
-          console.log("logged in with payload: " + JSON.stringify(payload))
           return res.render('user/User', payload);
         }
       });

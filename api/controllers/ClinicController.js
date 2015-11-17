@@ -65,12 +65,12 @@ module.exports = {
 
 		var tables = 'clinic';
 		var condition = [];
-		if (id)  condition.push("id = " + id) 
+		if (id)  condition.push("clinic.id = " + id) 
 		if (local) { }  // add distance logic
 		if (user) { }     // most recent ?
 		if (staff) { 
 			tables += ', clinic_staff'; 
-			condition.push("clinic_staff.staff_id=staff.id AND staff_id = " + staff);
+			condition.push("clinic_staff.staff=staff.id AND staff = " + staff);
 		}
 
 		var query = "SELECT * from " + tables;

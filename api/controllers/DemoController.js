@@ -30,7 +30,6 @@ module.exports = {
             var payload = User.payload(user_id, 'Demo');
             var Params = payload || req.session.param || {};
           
-            console.log("payload: " + JSON.stringify(payload));
             var token = jwToken.issueToken(payload);
 
             Params['User'] = userData;            
@@ -85,8 +84,6 @@ module.exports = {
                   return res.send('');
                 }
                 else {
-                    console.log("loaded clinic data..." + clinicData);
-
                     var page = { 
                         item_Class : 'patient',
                         search_title : "Search for Patients using any of fields below",
@@ -94,11 +91,10 @@ module.exports = {
                     };
 
                     Params['page'] = page;   
-                    console.log('page... clinic...'); 
                     Params['clinic'] = clinicData;
 
                     console.log('-----');
-                    console.log("**** Page Input: ****" + JSON.stringify(Params));
+                    console.log("*** Render clinic page...***\n" + JSON.stringify(Params));
                     // res.send({"DEMO Clinic Data: " : req.session.param});
                     return res.render('clinic/Clinic', Params);
                 }   
@@ -124,14 +120,13 @@ module.exports = {
             var Params = payload || req.session.param;
             Params['User'] = userData;
                           
-            console.log("payload: " + JSON.stringify(payload));
             var token = jwToken.issueToken(payload);
             Params.token = token;
+            req.token = token;
 
             Appointment.loadAppointmentPageData( {appointment: demoAppointment}, function (err, data) {
                 if (err) { return res.send( { 'Error' : err }) }
 
-                console.log("*** set params:" + JSON.stringify(data));
                 Params['page'] = data.page;
                 Params['appointment'] = data.appointment;
                 Params['patient'] = data.patient;
@@ -139,6 +134,7 @@ module.exports = {
                 Params['schedule'] = data.schedule;
                 Params['protectionMap'] = data.protectionMap;
                 Params['clinic'] = data.clinic;
+                console.log("*** Render Appointment Page:" + JSON.stringify(Params));
                 return res.render("appointment/Appointment", Params);
             });
         });
