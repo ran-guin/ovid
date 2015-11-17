@@ -86,12 +86,12 @@ app.controller('AppointmentController',
             search : "Vaccine, Disease, Contraindications",
             hide: 'id',
 
-            query_table : "(vaccine,  protection, disease) LEFT JOIN contraindication ON contraindication.vaccine_id=vaccine.id LEFT JOIN vaccine_side_effect ON vaccine_side_effect.vaccine_id=vaccine.id LEFT JOIN side_effect ON side_effect_id=side_effect.id",
-            query_field : "vaccine.id as vaccine, disease, disease.name as Disease, vaccine.name as Vaccine, contraindication.condition as Contraindications, side_effect.name as known_side_effect, recommendationLevel as recommendation",
+            query_table : "(vaccine,  protection, disease)",
+            query_field : "vaccine.id as vaccine, disease.id as disease, disease.name as Disease, vaccine.name as Vaccine",
             query_condition : "protection.disease=disease.id and protection.vaccine=vaccine.id",
             
             // query : "SELECT DISTINCT User_Name,Request_Date,Item_Request_ID,Item_Category_Description,Unit_Qty,Item_Name,Item_Catalog,Vendor_ID,Vendor_Name, CASE WHEN Unit_Cost IS NULL THEN Item_Cost ELSE Unit_Cost END as Unit_Cost,Item_Request_Notes,Deliver_To, Item_Request_Notes FROM (Item, Item_Request, Request, User) JOIN Item_Category ON FK_Item_Category__ID=Item_Category_ID LEFT JOIN Vendor ON Vendor_ID=FK_Vendor__ID WHERE FK_Request__ID=Request_ID AND FKRequester_User__ID=User_ID AND FK_Item__ID=Item_ID AND Request_ID=FK_Request__ID",
-            set : "vaccine, disease, Vaccine, Disease, Contraindications",
+            set : "vaccine, disease, Vaccine, Disease",
             // condition : "FK_Item_Category__ID IN (<Item_Category>)",
             onEmpty : "No Vaccine found.<P><div class='alert alert-warning'>Please try different spellings or different field to search.<P>Please only add a new item if this item has never been received before.  <button class='btn btn-primary' type='button' data-toggle='modal' data-target='#newPatientModal'> Add New Patient </button></div>\n"
         };
@@ -163,7 +163,8 @@ app.controller('AppointmentController',
 
         Nto1Factory.addItem( $scope.itemColumns, $scope.include.treatment, 'treatment' );
 
-        console.log('added treatment...');
+        console.log('added treatment...' + JSON.stringify($scope.include.treatment));
+
         $rootScope.include['treatment'][index].status = 'Requested';
 
         $scope.postAdd('treatment', index);  // show past reactions ... 
