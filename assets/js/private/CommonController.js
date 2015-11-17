@@ -23,7 +23,7 @@ app.controller('CommonController',
 
 	        $scope.$apply();
 	    }, update_seconds*1000);
-
+   
         $scope.setup = function( config ) {
         	console.log('common setup');
         	$scope.$parent.setup(config);
@@ -36,62 +36,61 @@ app.controller('CommonController',
 		        
 		        if (config && config['User']) { 
 		            console.log("loaded user attributes");
-		            $scope.$parent.user = config['User'];
+		            $rootScope.user = config['User'];
 		        }
 		        if (config && config['clinic']) { 
 		            console.log("loaded clinic attributes in Appointment init");
-		            $scope.$parent.clinic = config['clinic'];
+		            $rootScope.clinic = config['clinic'];
 		        }
 		        if (config && config['patient']) { 
 		            console.log("loaded patient attributes");
-		            $scope.$parent.patient = config['patient'];
+		            $rootScope.patient = config['patient'];
 		        	
 		        }
 		        if (config && config['appointment']) { 
 		            console.log("loaded appointment attributes");
 
-		            $scope.$parent.clinic = config['appointment']['clinic'];
-		            //$scope.$parent.patient = config['appointment']['patient'];
-		            $scope.$parent.vaccinator = config['appointment']['vaccinator'];
-		            $scope.$parent.appointment = config['appointment'];
+		            $rootScope.clinic = config['appointment']['clinic'];
+		            //$rootScope.patient = config['appointment']['patient'];
+		            $rootScope.vaccinator = config['appointment']['vaccinator'];
+		            $rootScope.appointment = config['appointment'];
 
 		            var age = moment().diff(moment($scope.patient.birthdate), 'years');
 		            console.log('Age: ' + age);
-		           	$scope.$parent.patient.age = age;
+		           	$rootScope.patient.age = age;
 
 
 		        }
 		        if (config && config['treatments']) {
 		            console.log('load treatments...');
-		            $scope.$parent.treatments = config['treatments'];
+		            $rootScope.treatments = config['treatments'];
 
 		        }
 		        if (config && config['protectionMap']) {
-		            $scope.$parent.protectionMap  = config['protectionMap'];
+		            $rootScope.protectionMap  = config['protectionMap'];
 		            console.log('load protection map: ' + JSON.stringify($scope.protectionMap));
 
 		        }
 		        if (config && config['schedule']) {
-		            $scope.$parent.schedule  = config['schedule'];
+		            $rootScope.schedule  = config['schedule'];
 		            console.log('load schedule: ' + JSON.stringify($scope.schedule));
 		        }
 		 
 		        if (config && config['clinic'] && config['clinic']['appointments']) {
 		            console.log("Start with " + $scope.clinic.appointments.length);
-		            $scope.$parent.include = {};
-		            $scope.$parent.include.appointment = config['clinic']['appointments'];
+		            $rootScope.include.appointment = config['clinic']['appointments'];
 		            console.log("loaded " + $scope.clinic.appointments.length + " clinic appointments");
 		            console.log("equals " + $scope.include.appointment.length + " clinic appointments");
 		        }   
 
 		        if (config && config.token) {
 		        	console.log('saved token to angular scope ' + config.token);
-		        	$scope.$parent.token = config.token;
+		        	$rootScope.token = config.token;
 		        } 
 		        /*
 		        if (config && config.payload) {
 		        	console.log('saved payload ' + config.payload);
-		        	$scope.$parent.payload = config.payload;
+		        	$rootScope.payload = config.payload;
 		        } 
 */
 		 
@@ -113,7 +112,7 @@ app.controller('CommonController',
 	        .then ( function (response) {
 	        	if (response.data) {
 	        		console.log("Travel response: " + JSON.stringify(response.data));
-	            	$scope.$parent.travel = response.data;
+	            	$rootScope.travel = response.data;
 	        	}
 	        },
 	        function (err) { 
