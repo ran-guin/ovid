@@ -23,9 +23,9 @@ block content
                 a(href="#profile" aria-controls="profile" role="tab" data-toggle="tab") Profile
               li.active(role="presentation")
                 a(href="#Protection" aria-controls="Protection" role="tab" data-toggle="tab") Protection
-              li(role="required")
+              li(role="presentation")
                 a(href="#required" aria-controls="required" role="tab" data-toggle="tab") Required
-              li(role="travel")
+              li(role="presentation")
                 a(href="#travel" aria-controls="travel" role="tab" data-toggle="tab") Travel
             <!-- Tab panes -->
             div.tab-content
@@ -50,7 +50,7 @@ block content
               div.tab-pane#required(role="tabpanel")
                 include Pending_Immunization.jade
 
-              div.tab-pane#required(role="tabpanel")
+              div.tab-pane#travel(role="tabpanel")
                 include Travel_Immunization.jade
 
           if ! User
