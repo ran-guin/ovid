@@ -31,16 +31,29 @@ block content
             div.tab-content
               div.tab-pane#profile(role="tabpanel")
                 p &nbsp;
-                h3 Profile:
+
+                h4 Residential Region: {{ patient.region.name }}
+
+                h3 Patient Profile:
                 table.table
                   tr
-                      td Name
-                      td {{ patient.name }}
+                      td Name:
+                      td {{ patient.firstName }} {{ patient.lastName }}
                   tr 
-                    td Email
-                    td {{ patient.email }}
-                hr
-
+                      td Email:
+                      td {{ patient.email }}
+                  tr
+                      td Birthdate:
+                      td {{ patient.birthdate }}
+                  tr
+                      td Gender:
+                      td {{ patient.gender }}
+                  tr
+                      td {{ patient.identifierType }}:
+                      td {{ patient.identifier }}
+                  tr
+                      td Notes:
+                      td {{ patient.notes }}
 
               div.tab-pane.active#Protection(role="tabpanel")
                 p &nbsp;
