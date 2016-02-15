@@ -5,4 +5,8 @@ angular.module('HomepageModule').controller('HomepageController', ['$scope', '$h
                 loading: false
         }
 
+        Sscope.signup = function () {
+        	alert("SIGNING UP");
+        }
+
 }]);

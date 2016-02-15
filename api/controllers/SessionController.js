@@ -86,7 +86,7 @@ module.exports = {
                                 var Session = { 
                                     User : user,
                                     defaultPage: 'user/User',
-                                    url:  "http://limsdev06.bcgsc.ca:1337",
+                                    url:  "http://limsdev06.bcgsc.ca:6843",
                                 }
 
                                 console.log("Set Session Parameters from Session Controller");

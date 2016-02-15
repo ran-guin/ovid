@@ -40,4 +40,10 @@ module.exports = {
     });
   },
 
+  showDemoPage: function (req, res) {
+
+      console.log('public demo page');
+      return res.view('demo');
+  },
+
 };

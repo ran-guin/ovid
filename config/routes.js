@@ -46,29 +46,16 @@ module.exports.routes = {
   'GET /login': 'UserController.login',
   'GET /logout': 'UserController.logout',
 
-  
+  'GET /demo' : 'MainController.showDemoPage',
+
   // Home page 
   'GET /home': 'MainController.showMainPage',
-
-  // Test views directly 
-  'GET /test/date'   : { view : 'test/DatePicker' },
-  'GET /test/date2'   : { view : 'test/Date' },
-  
-  'GET /test/dropdown'   : { view : 'test/Dropdown' },
-  'GET /test/drop'   : { view : 'test/Drop' },
-
-  'GET /test/:option': 'TestController.test',
-
-  'GET /demo/test': 'DemoController.test',
-  'GET /demo/patient': 'DemoController.patient',
-  'GET /demo/clinic': 'DemoController.clinic',
-  'GET /demo/appointment': 'DemoController.appointment',
 
   // Default User pages 
   'GET /user/dashboard/:id': 'UserController.dashboard',
   'GET /user/:id': 'UserController.dashboard',
 
-  'GET /api': 'QueryController.staff',
+ 'GET /api': 'QueryController.staff',
   'GET /api/q': 'QueryController.query',
   'POST /api/search': 'QueryController.search',
 
@@ -92,21 +79,34 @@ module.exports.routes = {
   * for configuration options and examples.                                  *
   *                                                                          *
   ***************************************************************************/
+  
+  // Custom Pages 
 
+  // Demo Pages 
+  'GET /demo/test': 'DemoController.test',
+  'GET /demo/patient': 'DemoController.patient',
+  'GET /demo/clinic': 'DemoController.clinic',
+  'GET /demo/appointment': 'DemoController.appointment',
+
+  // Clinic Pages
   'GET /clinic/home/:id' : 'ClinicController.home',
   'GET /clinic/list': 'ClinicController.list',
   'GET /clinic/edit': 'ClinicController.edit',
   'GET /clinic/add' : 'ClinicController.new',
   'POST /clinic/add' : 'ClinicController.add',
   
+  // Appointment Pages
   'GET /appointment/home/:id' : 'AppointmentController.home',
 
+  // Staff Pages
   'GET /staff/load':   'StaffController.load',
   'GET /staff/list':   'StaffController.list',
   'GET /staff/manage': 'StaffController.manage',
 
+  // Patient Pages
   'GET /patient/history/:id' : 'PatientController.loadHistory',
 
+  // Other Custom Pages...
     'GET /cdc/travel/country/:country' : 'CdcController.travel',
     'GET /cdc/travel/region/:region'   : 'CdcController.travel',
     'GET /cdc/side_effects/:vaccine' : 'CdcController.side_effects',

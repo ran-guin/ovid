@@ -28,20 +28,18 @@ block content
         .alert.alert-danger 
           i.fa.fa-warning 
           b &nbsp; #{message}
-      if ! message
-        .alert.alert-danger no message
+
       .jumbotron(style='padding:50px')
         h1 OVID 
         h2 Online Vaccine & Immunization Database (Prototype)
-        h3 Demo Version:
+
         a.btn.btn-lg.btn-success(href='/signup') Sign up now!
         hr
-        a.btn.btn-lg.btn-success(href="/demo/patient") Sample Patient Interface
-        span &nbsp;
-        a.btn.btn-lg.btn-warning(href="/demo/clinic") Sample Clinic Reception Interface
-        span &nbsp;
-        a.btn.btn-lg.btn-danger(href="/demo/appointment") Sample Clinic Treatment Interface
-        span &nbsp;
-        a.btn.btn-lg.btn-primary(href="/demo/research") Sample Research Interface
-       
+        div.col-md-6
+          a.btn.btn-lg.btn-success(href="/demo") Demo 
+          span &nbsp;
+        div.col-md-6
+          a.btn.btn-lg.btn-warning(href="/info") Info
+          span &nbsp;
+
 

@@ -27,11 +27,18 @@ module.exports.policies = {
   ***************************************************************************/
 
   //'*': true,
-  '*': ['tokenAuthorized'],
+  'main' : {
+    'showDemoPage' : true
+  }, 
+
   'demo' : {
       '*' : true
   },
   
+  'public' : {
+	'*' : true,
+  },
+ 
   /*
   session: {
       'create' : true,
@@ -44,9 +51,12 @@ module.exports.policies = {
 
   user: {
       'create' : true,
-      'login' : true,
+      'login'  : true,
+      'signup' : true,
 //      '*' : "sessionAuth"
   },
+  
+  '*': ['tokenAuthorized'],
 
   // enable testing during development mode 
   test: {
