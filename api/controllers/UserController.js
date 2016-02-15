@@ -135,25 +135,16 @@ module.exports = {
               
               console.log("URL: " + sails.config.globals.url);
               var payload = { id: newUser.id, access: 'New User', url: sails.config.globals.url };
-              var token = null;
 
-              jwToken.issueToken(payload, function(err, result) {
-                  if (err) { 
-                      console.log("Error: " + err)
-                      return res.json(400, { "Error" : err });
-                  }
-                  else { 
-                      token = result;
-                      console.log('Generated new user: ' + JSON.stringify(payload));
-                      console.log("Token issued: " + token);
-                      req.session.token = token;
-                      return res.json(200, { user: req.param('name'), token: token });
-                  }
-              });
-    
-              console.log('fail');
-              // Send back the id of the new user
-              // return res.json(200, { user: req.param('name'), token: token, _csrf: token });
+              var token = jwToken.issueToken(payload);
+              
+              console.log('Generated new user: ' + JSON.stringify(payload));
+              console.log("Token issued: " + token);
+              
+              req.session.token = token;
+              
+              return res.json(200, { user: req.param('name'), token: token });
+
             });
           }
         });
